@@ -120,13 +120,18 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
         $interceptorCode = array_map(
             static fn (Interceptor $interceptor) =>
-                sprintf('(function () use (%s) {
+            sprintf('$returnValue = (function ()%s {
 %s
-})()', implode(', ', $interceptorParams), $interceptor->getCode()),
+})();
+
+if ($returnValue instanceof ReturnValue) {
+    return $returnValue->getValue();
+}
+', $forwardedParams ? 'use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode()),
             $interceptors
         );
 
-        $body = implode(";\n", array_map(static fn (string $line) => str_replace("\n", "\n        ", $line), $interceptorCode))
+        $body = implode("\n", array_map(static fn (string $line) => str_replace("\n", "\n        ", $line), $interceptorCode))
             . sprintf(";\n%sparent::%s(%s);", $return, $originalMethod->getName(), $forwardedParams);
 
         $method->setDocBlock('{@inheritDoc}');
