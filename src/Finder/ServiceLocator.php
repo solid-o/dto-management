@@ -9,8 +9,6 @@ use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
 use Solido\DtoManagement\Exception\ServiceNotFoundException;
 use function array_key_last;
 use function array_keys;
-use function assert;
-use function is_string;
 use function Safe\uksort;
 use function version_compare;
 
@@ -42,8 +40,7 @@ class ServiceLocator implements ContainerInterface
     public function get($id): object
     {
         if ($id === 'latest') {
-            $id = array_key_last($this->factories);
-            assert(is_string($id));
+            $id = (string) array_key_last($this->factories);
         }
 
         $id = (string) $id;
