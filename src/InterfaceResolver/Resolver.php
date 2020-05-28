@@ -18,11 +18,9 @@ class Resolver implements ResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(string $interface, $version = 'latest')
+    public function resolve(string $interface, $version = null)
     {
-        $locator = $this->registry->get($interface);
-
-        return $locator->get($version);
+        return $this->registry->get($interface)->get($version ?? 'latest');
     }
 
     public function has(string $interface): bool
