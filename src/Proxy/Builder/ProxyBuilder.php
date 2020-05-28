@@ -20,6 +20,7 @@ use Solido\DtoManagement\Exception\PropertyAlreadyDeclaredException;
 use Solido\DtoManagement\Proxy\ProxyInterface;
 use function array_column;
 use function array_filter;
+use function count;
 use function implode;
 use function in_array;
 use function interface_exists;
@@ -89,6 +90,17 @@ class ProxyBuilder
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED) as $method) {
             $this->accessibleMethods[$method->getName()] = $method;
         }
+    }
+
+    /**
+     * Whether this build has no interceptors and additional properties/methods.
+     */
+    public function empty(): bool
+    {
+        return count($this->propertyInterceptors) === 0 &&
+            count($this->methodInterceptors) === 0 &&
+            count($this->extraMethods) === 0 &&
+            count($this->extraProperties) === 0;
     }
 
     /**

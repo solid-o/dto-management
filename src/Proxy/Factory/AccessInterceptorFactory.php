@@ -6,6 +6,7 @@ namespace Solido\DtoManagement\Proxy\Factory;
 
 use ProxyManager\Factory\AbstractBaseFactory;
 use ProxyManager\ProxyGenerator\ProxyGeneratorInterface;
+use Solido\DtoManagement\Exception\EmptyBuilderException;
 use Solido\DtoManagement\Proxy\Generator\AccessInterceptorGenerator;
 use function assert;
 
@@ -28,7 +29,15 @@ class AccessInterceptorFactory extends AbstractBaseFactory
      */
     public function generateProxy(string $className, array $proxyOptions = []): string
     {
-        return parent::generateProxy($className, $proxyOptions);
+        try {
+            return parent::generateProxy($className, $proxyOptions);
+        } catch (EmptyBuilderException $exception) {
+            if ($proxyOptions['throw_empty'] ?? false) {
+                throw $exception;
+            }
+
+            return $className;
+        }
     }
 
     public function setGenerator(ProxyGeneratorInterface $generator): void

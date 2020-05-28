@@ -16,6 +16,7 @@ use ProxyManager\ProxyGenerator\ProxyGeneratorInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
+use Solido\DtoManagement\Exception\EmptyBuilderException;
 use Solido\DtoManagement\Proxy\Builder\Interceptor;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
 use Solido\DtoManagement\Proxy\Extension\ExtensionInterface;
@@ -49,6 +50,10 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
         foreach ($this->extensions as $extension) {
             $extension->extend($builder);
+        }
+
+        if ($builder->empty()) {
+            throw new EmptyBuilderException();
         }
 
         $publicPropertiesMap = new PublicPropertiesMap($builder->properties);

@@ -9,7 +9,6 @@ use Solido\DtoManagement\Proxy\Extension\ExtensionInterface;
 use Solido\DtoManagement\Proxy\Factory\AccessInterceptorFactory;
 use PHPUnit\Framework\TestCase;
 use Solido\DtoManagement\Proxy\Factory\Configuration;
-use Solido\DtoManagement\Proxy\GeneratorStrategy\CacheWriterGeneratorStrategy;
 use Solido\DtoManagement\Proxy\ProxyInterface;
 use Solido\DtoManagement\Tests\Fixtures\SemVerModel\Interfaces\UserInterface;
 use Solido\DtoManagement\Tests\Fixtures\SemVerModel\v2\v2_0_alpha_1\User;
@@ -19,7 +18,7 @@ use function is_subclass_of;
 
 class AccessInterceptorFactoryTest extends TestCase
 {
-    public function testShouldGenerateProxy(): void
+    public function testShouldNotGenerateProxyIfNoExtensionIsPresent(): void
     {
         $configuration = new Configuration();
         $configuration->setGeneratorStrategy(new EvaluatingGeneratorStrategy());
@@ -28,8 +27,7 @@ class AccessInterceptorFactoryTest extends TestCase
         $factory = new AccessInterceptorFactory($configuration);
         $className = $factory->generateProxy(User::class);
 
-        self::assertTrue(is_subclass_of($className, User::class));
-        self::assertEquals([UserInterface::class, ProxyInterface::class], array_values(class_implements($className)));
+        self::assertEquals(User::class, $className);
     }
 
     public function testShouldGenerateWithSetterInterceptors(): void
@@ -51,6 +49,8 @@ class AccessInterceptorFactoryTest extends TestCase
         $obj->barBar = 42;
 
         self::assertEquals('INTERCEPTED: 42', $obj->barBar);
+        self::assertTrue(is_subclass_of($className, User::class));
+        self::assertEquals([UserInterface::class, ProxyInterface::class], array_values(class_implements($className)));
     }
 
     public function testShouldGenerateWithMethodInterceptors(): void
