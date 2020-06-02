@@ -17,6 +17,7 @@ use Solido\DtoManagement\Exception\NonExistentInterfaceException;
 use Solido\DtoManagement\Exception\NonExistentMethodException;
 use Solido\DtoManagement\Exception\NonExistentPropertyException;
 use Solido\DtoManagement\Exception\PropertyAlreadyDeclaredException;
+use Solido\DtoManagement\Exception\TraitAlreadyAddedException;
 use Solido\DtoManagement\Proxy\ProxyInterface;
 use function array_column;
 use function array_filter;
@@ -38,6 +39,12 @@ class ProxyBuilder
 
     public ReflectionClass $class;
     public Properties $properties;
+
+    /**
+     * @var array<string, array<mixed>>
+     * @phpstan-var array<string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     */
+    private array $traits;
 
     /**
      * @var array<string, array<mixed>>
@@ -139,6 +146,39 @@ class ProxyBuilder
         }
 
         $this->interfaces[] = $interface;
+    }
+
+    /**
+     * Adds a trait to be added by this proxy.
+     *
+     * @param array<string, mixed> $aliases
+     * @param array<string, string> $overrides
+     *
+     * @phpstan-param array{method: string, alias: string, visibility?: int}[] $aliases
+     * @phpstan-param array{method: string, traitToReplace: string}[] $overrides
+     */
+    public function addTrait(string $traitName, array $aliases = [], array $overrides = []): void
+    {
+        if (isset($this->traits[$traitName])) {
+            throw new TraitAlreadyAddedException(sprintf('Trait "%s" has been already added for proxy of class %s', $traitName, $this->class->getName()));
+        }
+
+        $this->traits[$traitName] = [
+            'aliases' => $aliases,
+            'overrides' => $overrides,
+        ];
+    }
+
+    /**
+     * Gets the traits to be added to the proxy.
+     *
+     * @return array<string, mixed>
+     *
+     * @phpstan-return array<string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     */
+    public function getTraits(): array
+    {
+        return $this->traits;
     }
 
     /**
