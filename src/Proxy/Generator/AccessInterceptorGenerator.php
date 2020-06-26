@@ -115,12 +115,14 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
         $forwardedParams = implode(', ', $forwardedParams);
         $return = 'return ';
+        $returnValue = 'if ($returnValue instanceof ReturnValue) { return $returnValue->getValue(); }';
 
         $returnType = $originalMethod->getReturnType();
         assert($returnType === null || $returnType instanceof ReflectionNamedType);
 
         if ($returnType !== null && $returnType->getName() === 'void') {
             $return = '';
+            $returnValue = '';
         }
 
         $interceptorCode = array_map(
@@ -129,10 +131,8 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 %s
 })();
 
-if ($returnValue instanceof ReturnValue) {
-    return $returnValue->getValue();
-}
-', $forwardedParams ? 'use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode()),
+%s
+', $forwardedParams ? 'use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode(), $returnValue),
             $interceptors
         );
 

@@ -38,4 +38,9 @@ class User implements UserInterface
     {
         return 'unavailable_test';
     }
+
+    public function returningVoid(): void
+    {
+        $this->foo = 'void_called';
+    }
 }

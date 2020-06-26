@@ -73,4 +73,25 @@ class AccessInterceptorFactoryTest extends TestCase
 
         self::assertEquals('INTERCEPTED: 42', $obj->foo);
     }
+
+    public function testShouldNotThrowCompileErrorOnMethodReturingNull(): void
+    {
+        $configuration = new Configuration();
+        $configuration->setGeneratorStrategy(new EvaluatingGeneratorStrategy());
+        $configuration->setProxiesNamespace('__TMP__\\Solido\\Test4');
+        $configuration->addExtension(new class implements ExtensionInterface {
+            public function extend(ProxyBuilder $proxyBuilder): void
+            {
+                $proxyBuilder->addMethodInterceptor('returningVoid', new Interceptor('// Do nothing, just call the parent'));
+            }
+        });
+
+        $factory = new AccessInterceptorFactory($configuration);
+        $className = $factory->generateProxy(User::class);
+
+        $obj = new $className();
+        $obj->returningVoid();
+
+        self::assertEquals('void_called', $obj->foo);
+    }
 }
