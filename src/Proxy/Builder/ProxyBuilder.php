@@ -73,6 +73,9 @@ class ProxyBuilder
     /** @var array<string, array<Interceptor>> */
     private array $methodInterceptors = [];
 
+    /** @var array<string, array<Wrapper>> */
+    private array $methodWrappers = [];
+
     /** @var array<string, array<Interceptor>> */
     private array $propertyInterceptors = [];
 
@@ -106,6 +109,7 @@ class ProxyBuilder
     {
         return count($this->propertyInterceptors) === 0 &&
             count($this->methodInterceptors) === 0 &&
+            count($this->methodWrappers) === 0 &&
             count($this->extraMethods) === 0 &&
             count($this->extraProperties) === 0;
     }
@@ -265,6 +269,22 @@ class ProxyBuilder
     }
 
     /**
+     * Add wrapper of method.
+     */
+    public function addMethodWrapper(string $methodName, Wrapper $wrapper): void
+    {
+        if (! isset($this->accessibleMethods[$methodName])) {
+            throw new NonExistentMethodException(sprintf('Method "%s" is non-existent or not accessible on class %s', $methodName, $this->class->getName()));
+        }
+
+        if ($this->accessibleMethods[$methodName]->isFinal()) {
+            throw new FinalMethodException(sprintf('Method "%s" is final on class %s and cannot be intercepted', $methodName, $this->class->getName()));
+        }
+
+        $this->methodWrappers[$methodName][] = $wrapper;
+    }
+
+    /**
      * Adds an extra method to the proxy.
      * Name cannot conflict with public and protected methods of the base class.
      */
@@ -286,6 +306,16 @@ class ProxyBuilder
     public function getMethodInterceptors(string $methodName): array
     {
         return $this->methodInterceptors[$methodName] ?? [];
+    }
+
+    /**
+     * Gets the interceptors for given method.
+     *
+     * @return Wrapper[]
+     */
+    public function getMethodWrappers(string $methodName): array
+    {
+        return $this->methodWrappers[$methodName] ?? [];
     }
 
     /**

@@ -14,6 +14,7 @@ use Solido\DtoManagement\Exception\NonExistentPropertyException;
 use Solido\DtoManagement\Exception\PropertyAlreadyDeclaredException;
 use Solido\DtoManagement\Proxy\Builder\Interceptor;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
+use Solido\DtoManagement\Proxy\Builder\Wrapper;
 use Solido\DtoManagement\Proxy\ProxyInterface;
 use Solido\DtoManagement\Tests\Fixtures\FinalClass;
 use Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface;
@@ -71,6 +72,14 @@ class ProxyBuilderTest extends TestCase
         $builder->addMethodInterceptor('publicMethod', new Interceptor(''));
 
         self::assertCount(1, $builder->getMethodInterceptors('publicMethod'));
+    }
+
+    public function testShouldAddWrapperToAMethod(): void
+    {
+        $builder = new ProxyBuilder(new \ReflectionClass(ProxableClass::class));
+        $builder->addMethodWrapper('publicMethod', new Wrapper('try {', "} finally { echo \"CIAO\"; }"));
+
+        self::assertCount(1, $builder->getMethodWrappers('publicMethod'));
     }
 
     public function testShouldThrowIfTryingToAddAnInterceptorToAPrivateProperty(): void

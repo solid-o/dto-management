@@ -19,6 +19,7 @@ use ReflectionNamedType;
 use Solido\DtoManagement\Exception\EmptyBuilderException;
 use Solido\DtoManagement\Proxy\Builder\Interceptor;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
+use Solido\DtoManagement\Proxy\Builder\Wrapper;
 use Solido\DtoManagement\Proxy\Extension\ExtensionInterface;
 use Solido\DtoManagement\Proxy\Interceptor\ReturnValue;
 use function array_map;
@@ -73,7 +74,8 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
         foreach (ProxiedMethodsFilter::getProxiedMethods($originalClass) as $proxiedMethod) {
             $interceptors = $builder->getMethodInterceptors($proxiedMethod->getName());
-            if (count($interceptors) === 0) {
+            $wrappers = $builder->getMethodWrappers($proxiedMethod->getName());
+            if (count($interceptors) === 0 && count($wrappers) === 0) {
                 continue;
             }
 
@@ -81,7 +83,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
                 throw new InvalidArgumentException('Method "' . $proxiedMethod->getName() . '" is marked as final and cannot be proxied.');
             }
 
-            $classGenerator->addMethodFromGenerator($this->generateInterceptedMethod($proxiedMethod, $interceptors));
+            $classGenerator->addMethodFromGenerator($this->generateInterceptedMethod($proxiedMethod, $interceptors, $wrappers));
         }
 
         $classGenerator->addMethodFromGenerator(new MethodGenerator\MagicSet($originalClass, $valueHolder, $publicPropertiesMap, $builder));
@@ -95,8 +97,9 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
     /**
      * @param Interceptor[] $interceptors
+     * @param Wrapper[] $wrappers
      */
-    private function generateInterceptedMethod(ReflectionMethod $originalMethod, array $interceptors): LaminasMethodGenerator
+    private function generateInterceptedMethod(ReflectionMethod $originalMethod, array $interceptors, array $wrappers): LaminasMethodGenerator
     {
         $method = LaminasMethodGenerator::fromReflection(new MethodReflection($originalMethod->getDeclaringClass()->getName(), $originalMethod->getName()));
         foreach ($method->getParameters() as $parameter) {
@@ -140,6 +143,10 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
             . sprintf(";\n%sparent::%s(%s);", $return, $originalMethod->getName(), $forwardedParams);
 
         $method->setDocBlock('{@inheritDoc}');
+        foreach ($wrappers as $wrapper) {
+            $body = $wrapper->getCode($body);
+        }
+
         $method->setBody($body);
 
         return $method;
