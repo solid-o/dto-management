@@ -12,6 +12,7 @@ use ProxyManager\ProxyGenerator\Util\GetMethodIfExists;
 use ReflectionClass;
 use Solido\DtoManagement\Proxy\Builder\Interceptor;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
+
 use function array_map;
 use function count;
 use function implode;

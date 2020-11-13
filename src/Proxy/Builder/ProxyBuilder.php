@@ -19,6 +19,7 @@ use Solido\DtoManagement\Exception\NonExistentPropertyException;
 use Solido\DtoManagement\Exception\PropertyAlreadyDeclaredException;
 use Solido\DtoManagement\Exception\TraitAlreadyAddedException;
 use Solido\DtoManagement\Proxy\ProxyInterface;
+
 use function array_column;
 use function array_filter;
 use function count;

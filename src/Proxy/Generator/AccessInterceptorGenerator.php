@@ -22,6 +22,7 @@ use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
 use Solido\DtoManagement\Proxy\Builder\Wrapper;
 use Solido\DtoManagement\Proxy\Extension\ExtensionInterface;
 use Solido\DtoManagement\Proxy\Interceptor\ReturnValue;
+
 use function array_map;
 use function assert;
 use function count;
@@ -129,8 +130,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
         }
 
         $interceptorCode = array_map(
-            static fn (Interceptor $interceptor) =>
-            sprintf('$returnValue = (function ()%s {
+            static fn (Interceptor $interceptor) => sprintf('$returnValue = (function ()%s {
 %s
 })();
 

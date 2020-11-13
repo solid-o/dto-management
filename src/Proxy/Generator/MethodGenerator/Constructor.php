@@ -13,6 +13,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
+
 use function array_filter;
 use function array_key_exists;
 use function array_map;

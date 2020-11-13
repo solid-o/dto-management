@@ -7,6 +7,7 @@ namespace Solido\DtoManagement\Exception;
 use Psr\Container\ContainerExceptionInterface;
 use RuntimeException;
 use Throwable;
+
 use function implode;
 use function Safe\sprintf;
 

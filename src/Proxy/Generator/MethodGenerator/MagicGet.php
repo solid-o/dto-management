@@ -11,6 +11,7 @@ use ProxyManager\ProxyGenerator\PropertyGenerator\PublicPropertiesMap;
 use ProxyManager\ProxyGenerator\Util\GetMethodIfExists;
 use ProxyManager\ProxyGenerator\Util\PublicScopeSimulator;
 use ReflectionClass;
+
 use function Safe\sprintf;
 use function str_replace;
 

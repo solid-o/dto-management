@@ -8,6 +8,7 @@ use ProxyManager\Factory\AbstractBaseFactory;
 use ProxyManager\ProxyGenerator\ProxyGeneratorInterface;
 use Solido\DtoManagement\Exception\EmptyBuilderException;
 use Solido\DtoManagement\Proxy\Generator\AccessInterceptorGenerator;
+
 use function assert;
 
 class AccessInterceptorFactory extends AbstractBaseFactory

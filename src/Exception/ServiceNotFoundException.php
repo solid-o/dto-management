@@ -7,6 +7,7 @@ namespace Solido\DtoManagement\Exception;
 use InvalidArgumentException;
 use Psr\Container\NotFoundExceptionInterface;
 use Throwable;
+
 use function count;
 use function implode;
 use function Safe\sprintf;

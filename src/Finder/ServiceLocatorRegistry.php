@@ -7,6 +7,7 @@ namespace Solido\DtoManagement\Finder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use ReflectionClass;
 use Solido\DtoManagement\Exception\RuntimeException;
+
 use function array_keys;
 use function array_map;
 use function assert;

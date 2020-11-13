@@ -7,6 +7,7 @@ namespace Solido\DtoManagement\Finder;
 use Psr\Container\ContainerInterface;
 use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
 use Solido\DtoManagement\Exception\ServiceNotFoundException;
+
 use function array_key_last;
 use function array_keys;
 use function Safe\uksort;

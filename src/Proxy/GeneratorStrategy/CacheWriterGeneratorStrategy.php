@@ -8,11 +8,13 @@ use Closure;
 use Laminas\Code\Generator\ClassGenerator;
 use ProxyManager\Configuration;
 use ProxyManager\GeneratorStrategy\GeneratorStrategyInterface;
+
 use function restore_error_handler;
 use function Safe\file_put_contents;
 use function set_error_handler;
 use function str_replace;
 use function trim;
+
 use const DIRECTORY_SEPARATOR;
 
 class CacheWriterGeneratorStrategy implements GeneratorStrategyInterface
