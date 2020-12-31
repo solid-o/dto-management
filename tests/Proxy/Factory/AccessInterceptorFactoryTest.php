@@ -10,6 +10,7 @@ use Solido\DtoManagement\Proxy\Factory\AccessInterceptorFactory;
 use PHPUnit\Framework\TestCase;
 use Solido\DtoManagement\Proxy\Factory\Configuration;
 use Solido\DtoManagement\Proxy\ProxyInterface;
+use Solido\DtoManagement\Tests\Fixtures\Php8ProxableClass;
 use Solido\DtoManagement\Tests\Fixtures\SemVerModel\Interfaces\UserInterface;
 use Solido\DtoManagement\Tests\Fixtures\SemVerModel\v2\v2_0_alpha_1\User;
 use function array_values;
@@ -93,5 +94,32 @@ class AccessInterceptorFactoryTest extends TestCase
         $obj->returningVoid();
 
         self::assertEquals('void_called', $obj->foo);
+    }
+
+    /**
+     * @requires PHP >= 8.0
+     */
+    public function testShouldCorrectlyGenerateProxyAgainstClassWithUnionTypes(): void
+    {
+        $configuration = new Configuration();
+        $configuration->setGeneratorStrategy(new EvaluatingGeneratorStrategy());
+        $configuration->setProxiesNamespace('__TMP__\\Solido\\Test5');
+        $configuration->addExtension(new class implements ExtensionInterface {
+            public function extend(ProxyBuilder $proxyBuilder): void
+            {
+                $proxyBuilder->addPropertyInterceptor('unionProperty', new Interceptor('// Do nothing, just call the parent'));
+                $proxyBuilder->addMethodInterceptor('unionTypedMethod', new Interceptor('// Do nothing, just call the parent'));
+            }
+        });
+
+        $factory = new AccessInterceptorFactory($configuration);
+        $className = $factory->generateProxy(Php8ProxableClass::class);
+
+        $reflector = new \ReflectionClass($className);
+        $type = $reflector->getProperty('unionProperty')->getType();
+        self::assertInstanceOf(\ReflectionUnionType::class, $type);
+
+        $type = $reflector->getMethod('unionTypedMethod')->getReturnType();
+        self::assertInstanceOf(\ReflectionUnionType::class, $type);
     }
 }

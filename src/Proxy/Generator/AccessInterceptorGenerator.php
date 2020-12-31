@@ -24,7 +24,6 @@ use Solido\DtoManagement\Proxy\Extension\ExtensionInterface;
 use Solido\DtoManagement\Proxy\Interceptor\ReturnValue;
 
 use function array_map;
-use function assert;
 use function count;
 use function implode;
 use function Safe\sprintf;
@@ -122,9 +121,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
         $returnValue = 'if ($returnValue instanceof ReturnValue) { return $returnValue->getValue(); }';
 
         $returnType = $originalMethod->getReturnType();
-        assert($returnType === null || $returnType instanceof ReflectionNamedType);
-
-        if ($returnType !== null && $returnType->getName() === 'void') {
+        if ($returnType instanceof ReflectionNamedType && $returnType->getName() === 'void') {
             $return = '';
             $returnValue = '';
         }
@@ -135,7 +132,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 })();
 
 %s
-', $forwardedParams ? 'use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode(), $returnValue),
+', $forwardedParams ? ' use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode(), $returnValue),
             $interceptors
         );
 
