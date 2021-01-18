@@ -7,6 +7,7 @@ namespace Solido\DtoManagement\Finder;
 use Kcs\ClassFinder\Finder\ComposerFinder;
 use ReflectionClass;
 use Solido\DtoManagement\Exception\RuntimeException;
+use Solido\DtoManagement\Proxy\Factory\AccessInterceptorFactory;
 
 use function array_keys;
 use function array_map;
@@ -36,8 +37,10 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
      *
      * @phpstan-param class-string[] $excludedInterfaces
      */
-    public static function createFromNamespace(string $namespace, array $excludedInterfaces = []): ServiceLocatorRegistryInterface
+    public static function createFromNamespace(string $namespace, array $excludedInterfaces = [], ?AccessInterceptorFactory $proxyFactory = null): ServiceLocatorRegistryInterface
     {
+        $proxyFactory ??= new AccessInterceptorFactory();
+
         $finder = new ComposerFinder();
         $finder->inNamespace($namespace);
 
@@ -75,7 +78,12 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
             }
 
             /** @phpstan-var array<string, callable(): mixed> $factories */
-            $factories = array_map(static fn (string $className) => static fn () => new $className(), $versions);
+            $factories = array_map(static fn (string $className) => static function () use ($className, $proxyFactory) {
+                /** @phpstan-var class-string $className */
+                $proxyClass = $proxyFactory->generateProxy($className);
+
+                return new $proxyClass();
+            }, $versions);
             $locators[$interface] = static fn () => new ServiceLocator($factories);
         }
 

@@ -20,6 +20,8 @@ class AccessInterceptorFactory extends AbstractBaseFactory
      */
     public function __construct(?Configuration $configuration = null)
     {
+        $configuration ??= new Configuration();
+
         parent::__construct($configuration);
     }
 
