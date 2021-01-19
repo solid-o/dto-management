@@ -7,19 +7,35 @@ use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
 use Solido\DtoManagement\InterfaceResolver\Resolver;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 class ResolverTest extends TestCase
 {
     use ProphecyTrait;
 
-    public function testGetShouldCallCorrectLocator(): void
+    /**
+     * @dataProvider resolverVersionProvider
+     */
+    public function testGetShouldCallCorrectLocator($expected, $version): void
     {
         $registry = $this->prophesize(ServiceLocatorRegistry::class);
         $registry->get('Interface')->willReturn($locator = $this->prophesize(ServiceLocator::class));
-        $locator->get('latest')->willReturn($obj = new \stdClass());
+        $locator->get($expected)->willReturn($obj = new \stdClass());
 
         $resolver = new Resolver($registry->reveal());
-        self::assertSame($obj, $resolver->resolve('Interface'));
+        self::assertSame($obj, $resolver->resolve('Interface', $version));
+    }
+
+    public function resolverVersionProvider(): iterable
+    {
+        yield ['latest', null];
+        yield ['latest', 'latest'];
+        yield ['2.0', '2.0'];
+
+        $request = new Request();
+        $request->attributes->set('_version', '2.0');
+
+        yield ['2.0', $request];
     }
 
     public function testHasShouldForwardCallToRegistry(): void

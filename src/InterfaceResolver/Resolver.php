@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Solido\DtoManagement\InterfaceResolver;
 
 use Solido\DtoManagement\Finder\ServiceLocatorRegistryInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class Resolver implements ResolverInterface
 {
@@ -20,6 +21,10 @@ class Resolver implements ResolverInterface
      */
     public function resolve(string $interface, $version = null)
     {
+        if ($version instanceof Request) {
+            $version = $version->attributes->get('_version', 'latest');
+        }
+
         return $this->registry->get($interface)->get($version ?? 'latest');
     }
 
