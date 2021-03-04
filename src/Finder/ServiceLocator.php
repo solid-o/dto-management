@@ -72,10 +72,7 @@ class ServiceLocator implements ContainerInterface
         }
     }
 
-    /**
-     * @param string $id
-     */
-    public function __invoke($id): ?object
+    public function __invoke(string $id): ?object
     {
         try {
             return $this->get($id);

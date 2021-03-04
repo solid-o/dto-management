@@ -103,7 +103,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
     {
         $method = LaminasMethodGenerator::fromReflection(new MethodReflection($originalMethod->getDeclaringClass()->getName(), $originalMethod->getName()));
         foreach ($method->getParameters() as $parameter) {
-            Closure::bind(function () {
+            Closure::bind(function (): void {
                 $this->type = null;
             }, $parameter, ParameterGenerator::class)();
         }

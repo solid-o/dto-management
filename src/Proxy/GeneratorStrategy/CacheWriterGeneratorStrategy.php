@@ -25,7 +25,7 @@ class CacheWriterGeneratorStrategy implements GeneratorStrategyInterface
     public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
-        $this->emptyErrorHandler = static function () {
+        $this->emptyErrorHandler = static function (): void {
         };
     }
 
