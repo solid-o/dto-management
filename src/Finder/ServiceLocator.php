@@ -32,7 +32,9 @@ class ServiceLocator implements ContainerInterface
      */
     public function has($id): bool
     {
-        return version_compare($id, array_keys($this->factories)[0], '>=');
+        $key = array_keys($this->factories)[0];
+
+        return version_compare((string) $id, (string) $key, '>=');
     }
 
     /**

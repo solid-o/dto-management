@@ -24,6 +24,19 @@ class ServiceLocatorTest extends TestCase
         self::assertTrue($locator->has('2.0'));
     }
 
+    public function testHasShouldWorkWithIntegerVersions(): void
+    {
+        $locator = new ServiceLocator([
+            20210316 => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
+            20210318 => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
+        ]);
+
+        self::assertFalse($locator->has(20202001));
+        self::assertTrue($locator->has(20210316));
+        self::assertTrue($locator->has(20210317));
+        self::assertTrue($locator->has(20210318));
+    }
+
     public function testGetLatestShouldReturnTheLatestVersion(): void
     {
         $locator = new ServiceLocator([
