@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Solido\DtoManagement\Finder;
 
 use Kcs\ClassFinder\Finder\ComposerFinder;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
+use ReflectionNamedType;
 use Solido\DtoManagement\Exception\RuntimeException;
+use Solido\DtoManagement\Exception\ServiceNotFoundException;
 use Solido\DtoManagement\Proxy\Factory\AccessInterceptorFactory;
 
 use function array_keys;
@@ -37,8 +42,12 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
      *
      * @phpstan-param class-string[] $excludedInterfaces
      */
-    public static function createFromNamespace(string $namespace, array $excludedInterfaces = [], ?AccessInterceptorFactory $proxyFactory = null): ServiceLocatorRegistryInterface
-    {
+    public static function createFromNamespace(
+        string $namespace,
+        array $excludedInterfaces = [],
+        ?AccessInterceptorFactory $proxyFactory = null,
+        ?ContainerInterface $container = null
+    ): ServiceLocatorRegistryInterface {
         $proxyFactory ??= new AccessInterceptorFactory();
 
         $finder = new ComposerFinder();
@@ -78,11 +87,27 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
             }
 
             /** @phpstan-var array<string, callable(): mixed> $factories */
-            $factories = array_map(static fn (string $className) => static function () use ($className, $proxyFactory) {
+            $factories = array_map(static fn (string $className) => static function () use ($className, $proxyFactory, $container) {
                 /** @phpstan-var class-string $className */
                 $proxyClass = $proxyFactory->generateProxy($className);
 
-                return new $proxyClass();
+                $constructorArguments = [];
+                if ($container !== null) {
+                    foreach (self::getConstructorArgumentTypes(new ReflectionClass($className)) as $name => $type) {
+                        if ($type === null) {
+                            $constructorArguments[] = null;
+                            continue;
+                        }
+
+                        try {
+                            $constructorArguments[] = $container->get($type);
+                        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+                            throw new ServiceNotFoundException($name, $className, $e);
+                        }
+                    }
+                }
+
+                return new $proxyClass(...$constructorArguments);
             }, $versions);
             $locators[$interface] = static fn () => new ServiceLocator($factories);
         }
@@ -120,5 +145,33 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
     public function getInterfaces(): array
     {
         return array_keys($this->locators);
+    }
+
+    /**
+     * @return array<string, string|null>
+     *
+     * @phpstan-return  array<string, class-string|null>
+     */
+    private static function getConstructorArgumentTypes(ReflectionClass $reflector): array
+    {
+        $constructor = $reflector->getConstructor();
+        if ($constructor === null) {
+            return [];
+        }
+
+        $arguments = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            $name = $parameter->getName();
+            if (! $type instanceof ReflectionNamedType || $type->isBuiltin()) {
+                $arguments[$name] = null;
+                continue;
+            }
+
+            $arguments[$name] = $type->getName();
+        }
+
+        /** @phpstan-ignore-next-line */
+        return $arguments;
     }
 }

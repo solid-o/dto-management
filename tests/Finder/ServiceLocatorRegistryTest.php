@@ -4,6 +4,8 @@ namespace Solido\DtoManagement\Tests\Finder;
 
 use Laminas\Code\Generator\MethodGenerator;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Container\ContainerInterface;
 use Solido\DtoManagement\Exception\RuntimeException;
 use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
@@ -16,6 +18,8 @@ use Solido\DtoManagement\Tests\Fixtures;
 
 class ServiceLocatorRegistryTest extends TestCase
 {
+    use ProphecyTrait;
+
     public function testLoadShouldCreateModelServices(): void
     {
         $registry = ServiceLocatorRegistry::createFromNamespace('Solido\\DtoManagement\\Tests\\Fixtures\\Model');
@@ -80,5 +84,28 @@ class ServiceLocatorRegistryTest extends TestCase
             Fixtures\SemVerModel\Interfaces\FooInterface::class,
             Fixtures\SemVerModel\Interfaces\UserInterface::class,
         ], $interfaces);
+    }
+
+    public function testLoadShouldGuessAndLoadTypeHintedServicesIntoModels(): void
+    {
+        $container = $this->prophesize(ContainerInterface::class);
+        $container->get('stdClass')->shouldBeCalled()->willReturn($arg1 = new \stdClass());
+        $container->get(Fixtures\DefinedService::class)->shouldBeCalled()->willReturn($arg2 = new Fixtures\DefinedService());
+
+        $registry = ServiceLocatorRegistry::createFromNamespace(
+            'Solido\\DtoManagement\\Tests\\Fixtures\\ServicedModel',
+            [],
+            null,
+            $container->reveal()
+        );
+
+        self::assertInstanceOf(ServiceLocatorRegistry::class, $registry);
+        self::assertTrue($registry->has(Fixtures\ServicedModel\Interfaces\UserInterface::class));
+
+        $locator = $registry->get(Fixtures\ServicedModel\Interfaces\UserInterface::class);
+        $user = $locator->get('1.0');
+
+        self::assertSame($arg1, $user->service1);
+        self::assertSame($arg2, $user->service);
     }
 }

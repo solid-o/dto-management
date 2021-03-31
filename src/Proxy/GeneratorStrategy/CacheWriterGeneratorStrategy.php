@@ -26,12 +26,16 @@ class CacheWriterGeneratorStrategy implements GeneratorStrategyInterface
     {
         $this->configuration = $configuration;
         $this->emptyErrorHandler = static function (): void {
+            // Explicitly empty
         };
     }
 
     public function generate(ClassGenerator $classGenerator): string
     {
-        $className = trim($classGenerator->getNamespaceName(), '\\') . '\\' . trim($classGenerator->getName(), '\\');
+        $namespace = trim($classGenerator->getNamespaceName() ?? '', '\\');
+        $namespace = $namespace ? $namespace . '\\' : $namespace;
+
+        $className = $namespace . trim($classGenerator->getName(), '\\');
         $fileName = $this->configuration->getProxiesTargetDir() . DIRECTORY_SEPARATOR . str_replace('\\', '', $className) . '.php';
 
         $code = '<?php ' . $classGenerator->generate();
