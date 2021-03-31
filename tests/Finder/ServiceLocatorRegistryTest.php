@@ -89,6 +89,9 @@ class ServiceLocatorRegistryTest extends TestCase
     public function testLoadShouldGuessAndLoadTypeHintedServicesIntoModels(): void
     {
         $container = $this->prophesize(ContainerInterface::class);
+        $container->has('stdClass')->willReturn(true);
+        $container->has(Fixtures\DefinedService::class)->willReturn(true);
+
         $container->get('stdClass')->shouldBeCalled()->willReturn($arg1 = new \stdClass());
         $container->get(Fixtures\DefinedService::class)->shouldBeCalled()->willReturn($arg2 = new Fixtures\DefinedService());
 
