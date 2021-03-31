@@ -10,7 +10,7 @@ class DefaultValueArgumentValueResolver implements ArgumentValueResolverInterfac
 {
     public function supports(ReflectionParameter $parameter): bool
     {
-        return $parameter->isDefaultValueAvailable();
+        return $parameter->isDefaultValueAvailable() && ! $parameter->isVariadic();
     }
 
     /**

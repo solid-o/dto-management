@@ -10,7 +10,7 @@ class NullArgumentValueResolver implements ArgumentValueResolverInterface
 {
     public function supports(ReflectionParameter $parameter): bool
     {
-        return $parameter->allowsNull();
+        return $parameter->allowsNull() && ! $parameter->isVariadic();
     }
 
     /**
