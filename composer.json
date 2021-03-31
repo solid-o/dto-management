@@ -20,7 +20,7 @@
     },
     "require": {
         "php": "^7.4|^8.0",
-        "kcs/class-finder": "^0.1.5|^0.2",
+        "kcs/class-finder": "^0.1.5|^0.2|^0.3",
         "nikic/php-parser": "^4.4",
         "ocramius/proxy-manager": "^2.6",
         "psr/container": "^1.0"
