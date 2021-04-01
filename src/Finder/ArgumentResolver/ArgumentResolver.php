@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Solido\DtoManagement\Finder\ArgumentResolver;
 
-use ReflectionFunctionAbstract;
-use ReflectionMethod;
+use ReflectionClass;
 use Solido\DtoManagement\Exception\RuntimeException;
 
 use function get_debug_type;
@@ -27,17 +26,26 @@ class ArgumentResolver implements ArgumentResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function getArguments(ReflectionFunctionAbstract $reflector): iterable
+    public function getArguments(string $className, string $method): iterable
     {
         $arguments = [];
+        $reflectionClass = new ReflectionClass($className);
+        $reflector = $method === '__construct' ? $reflectionClass->getConstructor() : $reflectionClass->getMethod($method);
+        if ($reflector === null) {
+            return $arguments;
+        }
 
         foreach ($reflector->getParameters() as $parameter) {
+            $hasDefault = $parameter->isDefaultValueAvailable();
+            $defaultValue = $hasDefault ? $parameter->getDefaultValue() : null;
+            $argument = new Argument($className, $parameter->getName(), $parameter->getType(), $hasDefault, $defaultValue, $parameter->isVariadic(), $parameter->allowsNull());
+
             foreach ($this->resolvers as $resolver) {
-                if (! $resolver->supports($parameter)) {
+                if (! $resolver->supports($argument)) {
                     continue;
                 }
 
-                $resolved = $resolver->resolve($parameter);
+                $resolved = $resolver->resolve($argument);
 
                 $atLeastOne = false;
                 foreach ($resolved as $append) {
@@ -49,20 +57,11 @@ class ArgumentResolver implements ArgumentResolverInterface
                     throw new RuntimeException(sprintf('"%s::resolve()" must yield at least one value.', get_debug_type($resolver)));
                 }
 
-                // continue to the next controller argument
+                // continue to the next argument
                 continue 2;
             }
 
-            if ($reflector instanceof ReflectionMethod) {
-                $class = $reflector->getDeclaringClass();
-                $name = $reflector->getName();
-
-                $representative = sprintf('%s::%s()', $class->getName(), $name);
-            } else {
-                $representative = $reflector->getName();
-            }
-
-            throw new RuntimeException(sprintf('"%s" requires that you provide a value for the "$%s" argument. Either the argument is nullable and no null value has been provided, no default value has been provided or because there is a non optional argument after this one.', $representative, $parameter->getName()));
+            throw new RuntimeException(sprintf('"%s::%s()" requires that you provide a value for the "$%s" argument. Either the argument is nullable and no null value has been provided, no default value has been provided or because there is a non optional argument after this one.', $className, $method, $parameter->getName()));
         }
 
         return $arguments;

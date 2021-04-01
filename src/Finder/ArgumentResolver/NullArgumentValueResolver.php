@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Solido\DtoManagement\Finder\ArgumentResolver;
 
-use ReflectionParameter;
-
 class NullArgumentValueResolver implements ArgumentValueResolverInterface
 {
-    public function supports(ReflectionParameter $parameter): bool
+    public function supports(Argument $argument): bool
     {
-        return $parameter->allowsNull() && ! $parameter->isVariadic();
+        return $argument->allowsNull() && ! $argument->isVariadic();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter): iterable
+    public function resolve(Argument $argument): iterable
     {
         yield null;
     }

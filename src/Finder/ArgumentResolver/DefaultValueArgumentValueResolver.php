@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace Solido\DtoManagement\Finder\ArgumentResolver;
 
-use ReflectionParameter;
-
 class DefaultValueArgumentValueResolver implements ArgumentValueResolverInterface
 {
-    public function supports(ReflectionParameter $parameter): bool
+    public function supports(Argument $argument): bool
     {
-        return $parameter->isDefaultValueAvailable() && ! $parameter->isVariadic();
+        return $argument->hasDefault() && ! $argument->isVariadic();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter): iterable
+    public function resolve(Argument $argument): iterable
     {
-        yield $parameter->getDefaultValue();
+        yield $argument->getDefaultValue();
     }
 }

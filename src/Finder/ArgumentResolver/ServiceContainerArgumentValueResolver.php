@@ -6,7 +6,6 @@ namespace Solido\DtoManagement\Finder\ArgumentResolver;
 
 use Psr\Container\ContainerInterface;
 use ReflectionNamedType;
-use ReflectionParameter;
 
 use function assert;
 
@@ -19,9 +18,9 @@ class ServiceContainerArgumentValueResolver implements ArgumentValueResolverInte
         $this->container = $container;
     }
 
-    public function supports(ReflectionParameter $parameter): bool
+    public function supports(Argument $argument): bool
     {
-        $parameterType = $parameter->getType();
+        $parameterType = $argument->getParameterType();
 
         return $parameterType instanceof ReflectionNamedType &&
             (! $parameterType->isBuiltin()) &&
@@ -31,9 +30,9 @@ class ServiceContainerArgumentValueResolver implements ArgumentValueResolverInte
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter): iterable
+    public function resolve(Argument $argument): iterable
     {
-        $parameterType = $parameter->getType();
+        $parameterType = $argument->getParameterType();
         assert($parameterType instanceof ReflectionNamedType);
 
         yield $this->container->get($parameterType->getName());

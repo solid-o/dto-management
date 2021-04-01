@@ -91,9 +91,7 @@ class RegistryBuilder
             $factories = array_map(static fn (string $className) => static function () use ($className, $proxyFactory, $argumentResolver) {
                 /** @phpstan-var class-string $className */
                 $proxyClass = $proxyFactory->generateProxy($className);
-
-                $constructor = (new ReflectionClass($className))->getConstructor();
-                $constructorArguments = $constructor !== null ? $argumentResolver->getArguments($constructor) : [];
+                $constructorArguments = $argumentResolver->getArguments($className, '__construct');
 
                 return new $proxyClass(...$constructorArguments);
             }, $versions);
