@@ -103,7 +103,6 @@ class RegistryBuilder
 
     /**
      * @return array<string, ReflectionClass>|array<string, array<string, string>>[]
-     *
      * @phpstan-return array{0: array<class-string, ReflectionClass>, 1: array<class-string, array<string, string>>}
      */
     private function collectInterfaces(ComposerFinder $finder): array

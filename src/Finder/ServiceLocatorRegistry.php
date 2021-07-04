@@ -27,7 +27,6 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
      * Creates a locator registry from namespace.
      *
      * @param string[] $excludedInterfaces
-     *
      * @phpstan-param class-string[] $excludedInterfaces
      */
     public static function createFromNamespace(
@@ -77,7 +76,6 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
      * Gets all the interfaces names registered in this registry.
      *
      * @return string[]
-     *
      * @phpstan-return class-string[]
      */
     public function getInterfaces(): array

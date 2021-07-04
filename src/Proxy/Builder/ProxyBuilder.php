@@ -119,7 +119,6 @@ class ProxyBuilder
      * Gets the list of interfaces to be implemented by the generated proxy.
      *
      * @return string[]
-     *
      * @phpstan-return class-string[]
      */
     public function getInterfaces(): array
@@ -158,7 +157,6 @@ class ProxyBuilder
      *
      * @param array<string, mixed> $aliases
      * @param array<string, string> $overrides
-     *
      * @phpstan-param array{method: string, alias: string, visibility?: int}[] $aliases
      * @phpstan-param array{method: string, traitToReplace: string}[] $overrides
      */
@@ -178,7 +176,6 @@ class ProxyBuilder
      * Gets the traits to be added to the proxy.
      *
      * @return array<string, mixed>
-     *
      * @phpstan-return array<string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
      */
     public function getTraits(): array

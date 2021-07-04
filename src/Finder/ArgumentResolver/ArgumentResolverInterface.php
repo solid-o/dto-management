@@ -9,9 +9,9 @@ interface ArgumentResolverInterface
     /**
      * Returns the arguments to pass to the given method.
      *
-     * @return iterable<mixed>
-     *
      * @phpstan-param class-string $className
+     *
+     * @return iterable<mixed>
      */
     public function getArguments(string $className, string $method): iterable;
 }
