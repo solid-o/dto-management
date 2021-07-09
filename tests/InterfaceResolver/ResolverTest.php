@@ -2,6 +2,7 @@
 
 namespace Solido\DtoManagement\Tests\InterfaceResolver;
 
+use Nyholm\Psr7\ServerRequest;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
@@ -36,6 +37,11 @@ class ResolverTest extends TestCase
         $request->attributes->set('_version', '2.0');
 
         yield ['2.0', $request];
+
+        $request = new ServerRequest('GET', '/');
+        $request = $request->withAttribute('_version', '2.1');
+
+        yield ['2.1', $request];
     }
 
     public function testHasShouldForwardCallToRegistry(): void
