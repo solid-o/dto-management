@@ -94,7 +94,7 @@ class Constructor extends MethodGenerator
      */
     private static function generateAnonymousClassValueHolder(Properties $properties, array $defaults): string
     {
-        $accessibleProperties = $properties->getPublicProperties();
+        $accessibleProperties = $properties->getAccessibleProperties();
 
         return "new class extends \stdClass {\n" .
             implode("\n", array_map(static function (ReflectionProperty $property) use (&$defaults): string {
@@ -107,7 +107,7 @@ class Constructor extends MethodGenerator
 
     private static function generateUnsetAccessiblePropertiesCode(Properties $properties): string
     {
-        $accessibleProperties = $properties->getPublicProperties();
+        $accessibleProperties = $properties->getAccessibleProperties();
         if (! $accessibleProperties) {
             return '';
         }
