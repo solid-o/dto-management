@@ -86,6 +86,17 @@ class ServiceLocatorRegistryTest extends TestCase
         ], $interfaces);
     }
 
+    public function testLoadShouldIgnoreSpecifiedInterfaces(): void
+    {
+        $registry = ServiceLocatorRegistry::createFromNamespace(
+            'Solido\\DtoManagement\\Tests\\Fixtures\\SemVerModel',
+            [Fixtures\SemVerModel\Interfaces\FooInterface::class]
+        );
+
+        self::assertInstanceOf(ServiceLocatorRegistry::class, $registry);
+        self::assertFalse($registry->has(Fixtures\SemVerModel\Interfaces\FooInterface::class));
+    }
+
     public function testLoadShouldGuessAndLoadTypeHintedServicesIntoModels(): void
     {
         $container = $this->prophesize(ContainerInterface::class);

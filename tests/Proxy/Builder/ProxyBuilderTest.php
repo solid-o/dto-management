@@ -12,6 +12,7 @@ use Solido\DtoManagement\Exception\NonExistentInterfaceException;
 use Solido\DtoManagement\Exception\NonExistentMethodException;
 use Solido\DtoManagement\Exception\NonExistentPropertyException;
 use Solido\DtoManagement\Exception\PropertyAlreadyDeclaredException;
+use Solido\DtoManagement\Exception\TraitAlreadyAddedException;
 use Solido\DtoManagement\Proxy\Builder\Interceptor;
 use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
 use Solido\DtoManagement\Proxy\Builder\Wrapper;
@@ -19,6 +20,7 @@ use Solido\DtoManagement\Proxy\ProxyInterface;
 use Solido\DtoManagement\Tests\Fixtures\FinalClass;
 use Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface;
 use Solido\DtoManagement\Tests\Fixtures\ProxableClass;
+use Solido\DtoManagement\Tests\Fixtures\UserTrait;
 
 class ProxyBuilderTest extends TestCase
 {
@@ -48,6 +50,24 @@ class ProxyBuilderTest extends TestCase
         $builder->addInterface(UserInterface::class);
 
         self::assertEquals([ProxyInterface::class, UserInterface::class], $builder->getInterfaces());
+    }
+
+    public function testATraitCouldBeAddedToProxy(): void
+    {
+        $builder = new ProxyBuilder(new \ReflectionClass(ProxableClass::class));
+        $builder->addTrait(UserTrait::class);
+
+        self::assertEquals([UserTrait::class], array_keys($builder->getTraits()));
+    }
+
+    public function testATraitCouldNotBeAddedTwice(): void
+    {
+        $this->expectException(TraitAlreadyAddedException::class);
+        $this->expectExceptionMessage('Trait "'. UserTrait::class . '" has been already added for proxy of class '.ProxableClass::class);
+
+        $builder = new ProxyBuilder(new \ReflectionClass(ProxableClass::class));
+        $builder->addTrait(UserTrait::class);
+        $builder->addTrait(UserTrait::class);
     }
 
     public function testShouldThrowTryingToAddNonExistentInterface(): void

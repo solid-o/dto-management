@@ -5,6 +5,7 @@ namespace Solido\DtoManagement\Tests\Finder;
 use PHPUnit\Framework\TestCase;
 use Solido\DtoManagement\Exception\RuntimeException;
 use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
+use Solido\DtoManagement\Exception\ServiceNotFoundException;
 use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
 use Solido\DtoManagement\Tests\Fixtures;
@@ -74,6 +75,33 @@ class ServiceLocatorTest extends TestCase
             },
         ]);
 
-        $locator->get('0.1');
+        try {
+            $locator->get('0.1');
+        } catch (ServiceCircularReferenceException $e) {
+            self::assertEquals('0.1', $e->getServiceId());
+            self::assertEquals(['0.1', '0.1'], $e->getPath());
+            throw $e;
+        }
+    }
+
+    public function testGetShouldThrowOnInvalidVersion(): void
+    {
+        $this->expectException(ServiceNotFoundException::class);
+        $this->expectDeprecationMessage('You have requested a non-existent service "0.1".');
+
+        $locator = new ServiceLocator([
+            '1.0' => static function () use (&$locator) {
+                return new Fixtures\Model\v2017\v20171215\Circular($locator);
+            },
+        ]);
+
+        try {
+            $locator->get('0.1');
+        } catch (ServiceNotFoundException $e) {
+            self::assertEquals('0.1', $e->getId());
+            self::assertNull($e->getSourceId());
+            self::assertEquals(['1.0'], $e->getAlternatives());
+            throw $e;
+        }
     }
 }
