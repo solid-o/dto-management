@@ -15,6 +15,8 @@ use function strtolower;
 
 /**
  * Utility class used to filter methods that can be proxied.
+ *
+ * @internal
  */
 final class ProxiedMethodsFilter
 {
@@ -30,8 +32,8 @@ final class ProxiedMethodsFilter
     ];
 
     /**
-     * @param ReflectionClass $class    reflection class from which methods should be extracted
-     * @param string[]        $excluded methods to be ignored
+     * @param ReflectionClass $class reflection class from which methods should be extracted
+     * @param string[] $excluded methods to be ignored
      *
      * @return ReflectionMethod[]
      */
@@ -41,7 +43,7 @@ final class ProxiedMethodsFilter
     }
 
     /**
-     * @param string[]        $excluded
+     * @param string[] $excluded
      *
      * @return ReflectionMethod[]
      */
@@ -49,12 +51,10 @@ final class ProxiedMethodsFilter
     {
         $ignored = array_flip(array_map('strtolower', $excluded));
 
-        return array_filter($class->getMethods(), static function (ReflectionMethod $method) use ($ignored): bool {
-            return ! (
-                array_key_exists(strtolower($method->getName()), $ignored)
-                || self::methodCannotBeProxied($method)
-            );
-        });
+        return array_filter(
+            $class->getMethods(),
+            static fn (ReflectionMethod $method): bool => ! (array_key_exists(strtolower($method->getName()), $ignored) || self::methodCannotBeProxied($method))
+        );
     }
 
     /**
@@ -62,6 +62,6 @@ final class ProxiedMethodsFilter
      */
     private static function methodCannotBeProxied(ReflectionMethod $method): bool
     {
-        return $method->isConstructor() || $method->isPrivate() || $method->isStatic();
+        return $method->isConstructor() || $method->isPrivate() || $method->isStatic() || $method->isFinal();
     }
 }

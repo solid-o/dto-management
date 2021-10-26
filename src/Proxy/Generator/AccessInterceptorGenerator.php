@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Solido\DtoManagement\Proxy\Generator;
 
 use Closure;
-use InvalidArgumentException;
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\MethodGenerator as LaminasMethodGenerator;
 use Laminas\Code\Generator\ParameterGenerator;
@@ -62,6 +61,19 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
         $classGenerator->setExtendedClass($originalClass->getName());
         $classGenerator->setImplementedInterfaces($builder->getInterfaces());
         $classGenerator->addPropertyFromGenerator($valueHolder = new ValueHolderProperty($originalClass));
+        foreach ($builder->getTraits() as $trait => $props) {
+            $reflection = new ReflectionClass($trait);
+            $classGenerator->addUse($trait);
+
+            $classGenerator->addTrait($reflection->getShortName());
+            foreach ($props['aliases'] as $alias) {
+                $classGenerator->addTraitAlias($alias['method'], $alias['alias'], $alias['visibility'] ?? null);
+            }
+
+            foreach ($props['overrides'] as $alias) {
+                $classGenerator->addTraitOverride($alias['method'], $alias['traitToReplace']);
+            }
+        }
 
         foreach ($builder->getExtraProperties() as $property) {
             $classGenerator->addPropertyFromGenerator($property);
@@ -77,10 +89,6 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
             $wrappers = $builder->getMethodWrappers($proxiedMethod->getName());
             if (count($interceptors) === 0 && count($wrappers) === 0) {
                 continue;
-            }
-
-            if ($proxiedMethod->isFinal()) {
-                throw new InvalidArgumentException('Method "' . $proxiedMethod->getName() . '" is marked as final and cannot be proxied.');
             }
 
             $classGenerator->addMethodFromGenerator($this->generateInterceptedMethod($proxiedMethod, $interceptors, $wrappers));
@@ -131,12 +139,11 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 %s
 })();
 
-%s
-', $forwardedParams ? ' use (' . implode(', ', $interceptorParams) . ')' : '', $interceptor->getCode(), $returnValue),
+%s', $forwardedParams ? ' use (' . implode(', ', $interceptorParams) . ')' : '', '    ' . str_replace("\n", "\n    ", $interceptor->getCode()), $returnValue),
             $interceptors
         );
 
-        $body = implode("\n", array_map(static fn (string $line) => str_replace("\n", "\n        ", $line), $interceptorCode))
+        $body = implode("\n", $interceptorCode)
             . sprintf(";\n%sparent::%s(%s);", $return, $originalMethod->getName(), $forwardedParams);
 
         $method->setDocBlock('{@inheritDoc}');

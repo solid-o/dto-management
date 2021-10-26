@@ -10,6 +10,7 @@ use Solido\DtoManagement\Exception\ServiceNotFoundException;
 
 use function array_key_last;
 use function array_keys;
+use function end;
 use function Safe\uksort;
 use function version_compare;
 
@@ -17,6 +18,8 @@ class ServiceLocator implements ContainerInterface
 {
     /** @var array<string, callable|true> */
     private array $factories;
+    /** @var array<string, string> */
+    private array $loading;
 
     /**
      * @param array<string, callable> $factories
@@ -24,6 +27,7 @@ class ServiceLocator implements ContainerInterface
     public function __construct(array $factories)
     {
         $this->factories = $factories;
+        $this->loading = [];
         uksort($this->factories, 'version_compare');
     }
 
@@ -43,7 +47,7 @@ class ServiceLocator implements ContainerInterface
     public function get($id): object
     {
         if ($id === 'latest') {
-            $id = (string) array_key_last($this->factories);
+            $id = array_key_last($this->factories);
         }
 
         $id = (string) $id;
@@ -58,7 +62,7 @@ class ServiceLocator implements ContainerInterface
         }
 
         if ($last === null) {
-            throw new ServiceNotFoundException($id, null, null, array_keys($this->factories));
+            throw new ServiceNotFoundException($id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
         }
 
         $factory = $this->factories[$last];
@@ -67,10 +71,12 @@ class ServiceLocator implements ContainerInterface
         }
 
         $this->factories[$last] = true;
+        $this->loading[$id] = $id;
         try {
             return $factory();
         } finally {
             $this->factories[$last] = $factory;
+            unset($this->loading[$id]);
         }
     }
 

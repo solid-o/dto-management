@@ -3,13 +3,18 @@
 namespace Solido\DtoManagement\Tests\Finder;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument as ProphecyArgument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Solido\DtoManagement\Exception\RuntimeException;
-use Solido\DtoManagement\Exception\ServiceNotFoundException;
+use Solido\DtoManagement\Finder\ArgumentResolver\Argument;
+use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentValueResolverInterface;
 use Solido\DtoManagement\Finder\RegistryBuilder;
 use Solido\DtoManagement\Tests\Fixtures;
 
 class RegistryBuilderTest extends TestCase
 {
+    use ProphecyTrait;
+
     public function testInterfaceExclusion(): void
     {
         $builder = new RegistryBuilder(Fixtures\SemVerModel::class);
@@ -29,6 +34,8 @@ class RegistryBuilderTest extends TestCase
         $registry = $builder->build();
 
         self::assertTrue($registry->has(Fixtures\SemVerModel\Interfaces\UserInterface::class));
+        self::assertFalse($registry->has(Fixtures\ServicedModel\Interfaces\UserInterface::class));
+        self::assertFalse($registry->has(Fixtures\Model\Interfaces\UserInterface::class));
 
         $locator = $registry->get(Fixtures\SemVerModel\Interfaces\UserInterface::class);
         self::assertEquals(['1.0', '1.1', '1.2', '2.0.alpha.1'], $locator->getVersions());
@@ -58,5 +65,23 @@ class RegistryBuilderTest extends TestCase
 
         $user = $locator->get('1.2');
         self::assertNull($user->user);
+    }
+
+    public function testShouldAddCustomArgumentValueResolver(): void
+    {
+        $resolver = $this->prophesize(ArgumentValueResolverInterface::class);
+        $builder = new RegistryBuilder(Fixtures\ServicedModel::class);
+        $builder->withArgumentValueResolver($resolver->reveal());
+
+        $registry = $builder->build();
+
+        $token = ProphecyArgument::that(static function (Argument $arg): bool {
+            return $arg->getParameterType()->getName() === Fixtures\ServicedModel\v1\v1_0\User::class;
+        });
+        $resolver->supports($token)->shouldBeCalled()->willReturn(true);
+        $resolver->resolve($token)->shouldBeCalled()->willReturn([new Fixtures\ServicedModel\v1\v1_0\User(new \stdClass(), new Fixtures\DefinedService())]);
+
+        $locator = $registry->get(Fixtures\ServicedModel\Interfaces\FooInterface::class);
+        $locator->get('1.0');
     }
 }

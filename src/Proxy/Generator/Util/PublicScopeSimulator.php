@@ -6,15 +6,10 @@ namespace Solido\DtoManagement\Proxy\Generator\Util;
 
 use InvalidArgumentException;
 use Laminas\Code\Generator\PropertyGenerator;
-use ReflectionClass;
 
-use function array_filter;
 use function array_map;
 use function implode;
 use function Safe\sprintf;
-use function Safe\substr;
-use function str_replace;
-use function var_export;
 
 /**
  * Generates code necessary to simulate a fatal error in case of unauthorized
@@ -23,10 +18,8 @@ use function var_export;
  */
 class PublicScopeSimulator
 {
-    public const OPERATION_SET   = 'set';
     public const OPERATION_GET   = 'get';
     public const OPERATION_ISSET = 'isset';
-    public const OPERATION_UNSET = 'unset';
 
     /**
      * Generates code for simulating access to a property from the scope that is accessing a proxy.
@@ -40,46 +33,29 @@ class PublicScopeSimulator
     public static function getPublicAccessSimulationCode(
         string $operationType,
         string $nameParameter,
-        ?string $valueParameter = null,
-        ?PropertyGenerator $valueHolder = null,
-        ?string $returnPropertyName = null,
-        ?ReflectionClass $originalClass = null
+        PropertyGenerator $valueHolder,
+        string $returnPropertyName
     ): string {
         $byRef  = self::getByRefReturnValue($operationType);
-        $target = '$this';
+        $target = '$this->' . $valueHolder->getName();
 
-        if ($valueHolder) {
-            $target = '$this->' . $valueHolder->getName();
-        }
-
-        $originalClassReflection = $originalClass === null
-            ? 'new \\ReflectionClass(get_parent_class($this))'
-            : 'new \\ReflectionClass(' . var_export($originalClass->getName(), true) . ')';
-
-        $accessorEvaluation = $returnPropertyName
-            ? '$' . $returnPropertyName . ' = ' . $byRef . '$accessor();'
-            : '$returnValue = ' . $byRef . '$accessor();' . "\n\n" . 'return $returnValue;';
-
-        if ($operationType === self::OPERATION_UNSET) {
-            $accessorEvaluation = '$accessor();';
-        }
+        $originalClassReflection = 'new \\ReflectionClass(get_parent_class($this))';
+        $accessorEvaluation = '$' . $returnPropertyName . ' = ' . $byRef . '$accessor();';
 
         return '$realInstanceReflection = ' . $originalClassReflection . ';' . "\n\n"
             . 'if (! $realInstanceReflection->hasProperty($' . $nameParameter . ')) {' . "\n"
             . '    $targetObject = ' . $target . ';' . "\n\n"
             . self::getUndefinedPropertyNotice($operationType, $nameParameter)
-            . '    ' . self::getOperation($operationType, $nameParameter, $valueParameter) . "\n"
+            . '    ' . self::getOperation($operationType, $nameParameter) . "\n"
             . '}' . "\n\n"
             . '$targetObject = ' . self::getTargetObject($valueHolder) . ";\n"
             . '$accessor = function ' . $byRef . '() use ('
             . implode(', ', array_map(
-                static function (string $parameterName): string {
-                    return '$' . $parameterName;
-                },
-                array_filter(['targetObject', $nameParameter, $valueParameter])
+                static fn (string $parameterName): string => '$' . $parameterName,
+                ['targetObject', $nameParameter]
             ))
             . ') {' . "\n"
-            . '    ' . self::getOperation($operationType, $nameParameter, $valueParameter) . "\n"
+            . '    ' . self::getOperation($operationType, $nameParameter) . "\n"
             . "};\n"
             . self::generateScopeReBind()
             . $accessorEvaluation;
@@ -90,13 +66,13 @@ class PublicScopeSimulator
      *
      * @phpstan-param self::OPERATION_* $operationType
      */
-    private static function getUndefinedPropertyNotice(string $operationType, string $nameParameter, ?string $interfaceName = null): string
+    private static function getUndefinedPropertyNotice(string $operationType, string $nameParameter): string
     {
         if ($operationType !== self::OPERATION_GET) {
             return '';
         }
 
-        $code = '    $backtrace = debug_backtrace(false, 1);' . "\n"
+        return '    $backtrace = debug_backtrace(false, 1);' . "\n"
             . '    trigger_error(' . "\n"
             . '        sprintf(' . "\n"
             . '            \'Undefined property: %s::$%s in %s on line %s\',' . "\n"
@@ -107,12 +83,6 @@ class PublicScopeSimulator
             . '        ),' . "\n"
             . '        \E_USER_NOTICE' . "\n"
             . '    );' . "\n";
-
-        if ($interfaceName !== null) {
-            $code = str_replace("\n    ", "\n", substr($code, 4));
-        }
-
-        return $code;
     }
 
     /**
@@ -126,7 +96,7 @@ class PublicScopeSimulator
      */
     private static function getByRefReturnValue(string $operationType): string
     {
-        return $operationType === self::OPERATION_GET || $operationType === self::OPERATION_SET ? '& ' : '';
+        return $operationType === self::OPERATION_GET ? '& ' : '';
     }
 
     /**
@@ -146,42 +116,17 @@ class PublicScopeSimulator
      *
      * @throws InvalidArgumentException
      */
-    private static function getOperation(string $operationType, string $nameParameter, ?string $valueParameter): string
+    private static function getOperation(string $operationType, string $nameParameter): string
     {
-        if ($valueParameter !== null && $operationType !== self::OPERATION_SET) {
-            throw new InvalidArgumentException(
-                'Parameter $valueParameter should be provided (only) when $operationType === "' . self::OPERATION_SET . '"'
-                . self::class
-                . '::OPERATION_SET'
-            );
+        if ($operationType === self::OPERATION_GET) {
+            return 'return $targetObject->$' . $nameParameter . ';';
         }
 
-        switch ($operationType) {
-            case self::OPERATION_GET:
-                return 'return $targetObject->$' . $nameParameter . ';';
-
-            case self::OPERATION_SET:
-                if ($valueParameter === null) {
-                    throw new InvalidArgumentException(
-                        'Parameter $valueParameter should be provided (only) when $operationType === "' . self::OPERATION_SET . '"'
-                        . self::class
-                        . '::OPERATION_SET'
-                    );
-                }
-
-                return '$targetObject->$' . $nameParameter . ' = $' . $valueParameter . ';'
-                    . "\n\n"
-                    . '    return $targetObject->$' . $nameParameter . ';';
-
-            case self::OPERATION_ISSET:
-                return 'return isset($targetObject->$' . $nameParameter . ');';
-
-            case self::OPERATION_UNSET:
-                return 'unset($targetObject->$' . $nameParameter . ');'
-                    . "\n\n"
-                    . '    return;';
+        if ($operationType === self::OPERATION_ISSET) {
+            return 'return isset($targetObject->$' . $nameParameter . ');';
         }
 
+        /* @phpstan-ignore-next-line */
         throw new InvalidArgumentException(sprintf('Invalid operation "%s" provided', $operationType));
     }
 

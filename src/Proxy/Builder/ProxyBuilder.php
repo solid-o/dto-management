@@ -27,7 +27,6 @@ use function implode;
 use function in_array;
 use function interface_exists;
 use function Safe\sprintf;
-use function str_replace;
 
 class ProxyBuilder
 {
@@ -43,7 +42,7 @@ class ProxyBuilder
 
     /**
      * @var array<string, array<mixed>>
-     * @phpstan-var array<string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     * @phpstan-var array<class-string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
      */
     private array $traits;
 
@@ -87,6 +86,7 @@ class ProxyBuilder
         $this->class = $class;
         $this->properties = Properties::fromReflectionClass($class);
         $this->interfaces = [ProxyInterface::class];
+        $this->traits = [];
 
         $this->extraProperties = [];
         $this->extraMethods = [];
@@ -94,7 +94,7 @@ class ProxyBuilder
         $this->accessibleMethods = [];
 
         foreach ($this->properties->getAccessibleProperties() as $property) {
-            $propertyName = str_replace("\0*\0", '', $property->getName());
+            $propertyName = $property->getName();
             $this->accessibleProperties[$propertyName] = $property;
         }
 
@@ -157,6 +157,7 @@ class ProxyBuilder
      *
      * @param array<string, mixed> $aliases
      * @param array<string, string> $overrides
+     * @phpstan-param class-string $traitName
      * @phpstan-param array{method: string, alias: string, visibility?: int}[] $aliases
      * @phpstan-param array{method: string, traitToReplace: string}[] $overrides
      */
@@ -176,7 +177,7 @@ class ProxyBuilder
      * Gets the traits to be added to the proxy.
      *
      * @return array<string, mixed>
-     * @phpstan-return array<string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     * @phpstan-return array<class-string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
      */
     public function getTraits(): array
     {
@@ -207,7 +208,7 @@ class ProxyBuilder
      * Adds an extra property to the proxy.
      * Name cannot conflict with public and protected properties of the base class.
      */
-    public function addProperty(PropertyGenerator $generator, string $constructor): void
+    public function addProperty(PropertyGenerator $generator, string $constructor = ''): void
     {
         $name = $generator->getName();
         if ($this->hasProperty($name)) {
@@ -276,7 +277,7 @@ class ProxyBuilder
         }
 
         if ($this->accessibleMethods[$methodName]->isFinal()) {
-            throw new FinalMethodException(sprintf('Method "%s" is final on class %s and cannot be intercepted', $methodName, $this->class->getName()));
+            throw new FinalMethodException(sprintf('Method "%s" is final on class %s and cannot be wrapped', $methodName, $this->class->getName()));
         }
 
         $this->methodWrappers[$methodName][] = $wrapper;

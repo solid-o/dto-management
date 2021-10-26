@@ -5,6 +5,7 @@ namespace Solido\DtoManagement\Tests\Finder;
 use PHPUnit\Framework\TestCase;
 use Solido\DtoManagement\Exception\RuntimeException;
 use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
+use Solido\DtoManagement\Exception\ServiceNotFoundException;
 use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
 use Solido\DtoManagement\Tests\Fixtures;
@@ -35,14 +36,16 @@ class ServiceLocatorTest extends TestCase
         self::assertTrue($locator->has(20210316));
         self::assertTrue($locator->has(20210317));
         self::assertTrue($locator->has(20210318));
+
+        self::assertNotNull($locator->get(20210318));
     }
 
     public function testGetLatestShouldReturnTheLatestVersion(): void
     {
         $locator = new ServiceLocator([
-            '1.0' => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
-            '1.1' => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
             '2.0' => fn () => new Fixtures\SemVerModel\v2\v2_0_alpha_1\User(),
+            '1.1' => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
+            '1.0' => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
         ]);
 
         self::assertInstanceOf(
@@ -67,6 +70,8 @@ class ServiceLocatorTest extends TestCase
     public function testGetShouldThrowOnCircularDependency(): void
     {
         $this->expectException(ServiceCircularReferenceException::class);
+        $this->expectExceptionCode(0);
+        $this->expectExceptionMessage('Circular reference detected for service "0.1", path: "0.1 -> 0.1".');
 
         $locator = new ServiceLocator([
             '0.1' => static function () use (&$locator) {
@@ -74,6 +79,47 @@ class ServiceLocatorTest extends TestCase
             },
         ]);
 
-        $locator->get('0.1');
+        try {
+            $locator->get('0.1');
+        } catch (ServiceCircularReferenceException $e) {
+            self::assertEquals('0.1', $e->getServiceId());
+            self::assertEquals(['0.1', '0.1'], $e->getPath());
+            throw $e;
+        }
+    }
+
+    public function testGetShouldThrowOnInvalidVersion(): void
+    {
+        $this->expectException(ServiceNotFoundException::class);
+        $this->expectDeprecationMessage('You have requested a non-existent service "0.1".');
+
+        $locator = new ServiceLocator([
+            '1.0' => static function () use (&$locator) {
+                return new Fixtures\Model\v2017\v20171215\Circular($locator);
+            },
+        ]);
+
+        try {
+            $locator->get('0.1');
+        } catch (ServiceNotFoundException $e) {
+            self::assertEquals('0.1', $e->getId());
+            self::assertNull($e->getSourceId());
+            self::assertEquals(['1.0'], $e->getAlternatives());
+            throw $e;
+        }
+    }
+
+    public function testGetShouldThrowOnNonResolvableService(): void
+    {
+        $this->expectException(ServiceNotFoundException::class);
+        $this->expectExceptionMessage('The service "1.0" has a dependency on a non-existent service "0.1". Did you mean this: "1.0"?');
+
+        $locator = new ServiceLocator([
+            '1.0' => static function () use (&$locator) {
+                return new Fixtures\Model\v2017\v20171215\Circular($locator);
+            },
+        ]);
+
+        $locator->get('1.0');
     }
 }

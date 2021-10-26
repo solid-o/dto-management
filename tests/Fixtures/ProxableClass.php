@@ -23,4 +23,8 @@ class ProxableClass
     final public function finalMethod(): void
     {
     }
+
+    public function publicWithVariadic(string ...$param): void
+    {
+    }
 }

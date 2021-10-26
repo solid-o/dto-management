@@ -60,6 +60,7 @@ class ServiceLocatorRegistryTest extends TestCase
     public function testShouldThrowIfNonexistentInterfaceIsRequested(): void
     {
         $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Cannot find service locator for "NonExistentInterface"');
 
         $registry = ServiceLocatorRegistry::createFromNamespace('Solido\\DtoManagement\\Tests\\Fixtures\\Model');
         $registry->get('NonExistentInterface');
@@ -84,6 +85,17 @@ class ServiceLocatorRegistryTest extends TestCase
             Fixtures\SemVerModel\Interfaces\FooInterface::class,
             Fixtures\SemVerModel\Interfaces\UserInterface::class,
         ], $interfaces);
+    }
+
+    public function testLoadShouldIgnoreSpecifiedInterfaces(): void
+    {
+        $registry = ServiceLocatorRegistry::createFromNamespace(
+            'Solido\\DtoManagement\\Tests\\Fixtures\\SemVerModel',
+            [Fixtures\SemVerModel\Interfaces\FooInterface::class]
+        );
+
+        self::assertInstanceOf(ServiceLocatorRegistry::class, $registry);
+        self::assertFalse($registry->has(Fixtures\SemVerModel\Interfaces\FooInterface::class));
     }
 
     public function testLoadShouldGuessAndLoadTypeHintedServicesIntoModels(): void

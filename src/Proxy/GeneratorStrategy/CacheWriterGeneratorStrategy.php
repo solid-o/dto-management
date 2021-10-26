@@ -13,7 +13,6 @@ use function restore_error_handler;
 use function Safe\file_put_contents;
 use function set_error_handler;
 use function str_replace;
-use function trim;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -32,10 +31,7 @@ class CacheWriterGeneratorStrategy implements GeneratorStrategyInterface
 
     public function generate(ClassGenerator $classGenerator): string
     {
-        $namespace = trim($classGenerator->getNamespaceName() ?? '', '\\');
-        $namespace = $namespace ? $namespace . '\\' : $namespace;
-
-        $className = $namespace . trim($classGenerator->getName(), '\\');
+        $className = ($classGenerator->getNamespaceName() ?? '') . $classGenerator->getName();
         $fileName = $this->configuration->getProxiesTargetDir() . DIRECTORY_SEPARATOR . str_replace('\\', '', $className) . '.php';
 
         $code = '<?php ' . $classGenerator->generate();

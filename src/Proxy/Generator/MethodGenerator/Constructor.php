@@ -70,10 +70,9 @@ class Constructor extends MethodGenerator
         $constructor = self::fromReflection($originalConstructor);
         $nameGenerator = static fn (ParameterGenerator $parameter) => ($parameter->getVariadic() ? '...' : '') . '$' . $parameter->getName();
 
-        return "\n\n"
-            . 'parent::' . $constructor->getName() . '('
+        return 'parent::' . $constructor->getName() . '('
             . implode(', ', array_map($nameGenerator, $constructor->getParameters()))
-            . ');';
+            . ");\n";
     }
 
     /**

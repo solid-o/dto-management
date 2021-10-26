@@ -1,0 +1,35 @@
+{
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "text": "infection\/infection.log"
+    },
+    "mutators": {
+        "global-ignoreSourceCodeByRegex": [
+            "assert.*",
+            "Util::assertValidPhpCode.*",
+            "\\$this->setDocBlock.*"
+        ],
+        "global-ignore": [
+            "Solido\\Common\\Urn\\Urn::parseUrn"
+        ],
+        "@default": true,
+        "DecrementInteger": {
+            "ignoreSourceCodeByRegex": [
+                ".*json_decode.*",
+                "throw new.*"
+            ]
+        },
+        "IncrementInteger": {
+            "ignoreSourceCodeByRegex": [
+                ".*json_decode.*",
+                "throw new.*"
+            ]
+        }
+    },
+    "minMsi": 90,
+    "minCoveredMsi": 95
+}
