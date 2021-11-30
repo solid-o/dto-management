@@ -13,10 +13,12 @@ interface ResolverInterface
      * Resolve the given interface and return the corresponding
      * service from the service container.
      *
+     * @param class-string<T> $interface
      * @param mixed $version
-     * @phpstan-param class-string $interface
      *
-     * @return mixed
+     * @return T
+     *
+     * @template T
      */
     public function resolve(string $interface, $version = 'latest');
 
