@@ -1,8 +1,8 @@
 name: Tests
 on:
     push:
-    pull_request:
-        types: [opened]
+    pull_request_target:
+        types: [opened, synchronize]
 
 jobs:
     build:
@@ -44,7 +44,6 @@ jobs:
 
             - name: SonarCloud Scan
               uses: sonarsource/sonarcloud-github-action@v1.5
-              if: ${{ github.base_ref == '' }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
