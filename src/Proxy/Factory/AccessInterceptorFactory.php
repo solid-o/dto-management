@@ -34,7 +34,7 @@ class AccessInterceptorFactory extends AbstractBaseFactory
     {
         try {
             return parent::generateProxy($className, $proxyOptions);
-        } catch (EmptyBuilderException $exception) {
+        } catch (EmptyBuilderException $exception) { /* @phpstan-ignore-line */
             if ($proxyOptions['throw_empty'] ?? false) {
                 throw $exception;
             }

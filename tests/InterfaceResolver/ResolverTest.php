@@ -4,6 +4,7 @@ namespace Solido\DtoManagement\Tests\InterfaceResolver;
 
 use Nyholm\Psr7\ServerRequest;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Solido\DtoManagement\Exception\InvalidArgumentException;
 use Solido\DtoManagement\Finder\ServiceLocator;
 use Solido\DtoManagement\Finder\ServiceLocatorRegistry;
 use Solido\DtoManagement\InterfaceResolver\Resolver;
@@ -42,6 +43,22 @@ class ResolverTest extends TestCase
         $request = $request->withAttribute('_version', '2.1');
 
         yield ['2.1', $request];
+        yield ['2.3', new class implements \Stringable {
+            public function __toString()
+            {
+                return '2.3';
+            }
+        }];
+    }
+
+    public function testGetShouldThrowIfVersionIsNotStringable(): void
+    {
+        $registry = $this->prophesize(ServiceLocatorRegistry::class);
+        $resolver = new Resolver($registry->reveal());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Version must be a string or a stringable object, array passed');
+        $resolver->resolve('Interface', ['not-stringable']);
     }
 
     public function testHasShouldForwardCallToRegistry(): void

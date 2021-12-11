@@ -14,6 +14,9 @@ use function end;
 use function Safe\uksort;
 use function version_compare;
 
+/**
+ * @template T of object
+ */
 class ServiceLocator implements ContainerInterface
 {
     /** @var array<string, callable|true> */
@@ -43,6 +46,8 @@ class ServiceLocator implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return T
      */
     public function get($id): object
     {

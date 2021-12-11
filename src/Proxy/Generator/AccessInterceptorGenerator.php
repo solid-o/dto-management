@@ -13,6 +13,7 @@ use ProxyManager\ProxyGenerator\LazyLoadingValueHolder\PropertyGenerator\ValueHo
 use ProxyManager\ProxyGenerator\PropertyGenerator\PublicPropertiesMap;
 use ProxyManager\ProxyGenerator\ProxyGeneratorInterface;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use Solido\DtoManagement\Exception\EmptyBuilderException;
@@ -43,6 +44,9 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws EmptyBuilderException
+     * @throws ReflectionException
      */
     public function generate(ReflectionClass $originalClass, ClassGenerator $classGenerator, array $options = []): void
     {
