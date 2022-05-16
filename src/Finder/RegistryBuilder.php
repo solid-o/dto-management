@@ -95,14 +95,15 @@ class RegistryBuilder
 
                 return new $proxyClass(...$constructorArguments);
             }, $versions);
-            $locators[$interface] = static fn () => new ServiceLocator($factories);
+
+            $locators[$interface] = static fn () => new ServiceLocator($interface, $factories);
         }
 
         return new ServiceLocatorRegistry($locators);
     }
 
     /**
-     * @return array<string, ReflectionClass>|array<string, array<string, string>>[]
+     * @return array<string, ReflectionClass>|array<string, array<string, string>>
      * @phpstan-return array{0: array<class-string, ReflectionClass>, 1: array<class-string, array<string, string>>}
      */
     private function collectInterfaces(ComposerFinder $finder): array

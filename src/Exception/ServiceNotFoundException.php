@@ -18,6 +18,7 @@ use function Safe\sprintf;
 class ServiceNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
     private string $id;
+    private string $version;
     private ?string $sourceId;
 
     /** @var string[] */
@@ -26,12 +27,13 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
     /**
      * @param string[] $alternatives
      */
-    public function __construct(string $id, ?string $sourceId = null, ?Throwable $previous = null, array $alternatives = [], ?string $msg = null)
+    public function __construct(string $id, string $version, ?string $sourceId = null, ?Throwable $previous = null, array $alternatives = [], ?string $msg = null)
     {
+        $version = $version ?: 'latest';
         if ($msg === null && $sourceId === null) {
-            $msg = sprintf('You have requested a non-existent service "%s".', $id);
+            $msg = sprintf('You have requested a non-existent version "%s" for service "%s".', $version, $id);
         } elseif ($msg === null) {
-            $msg = sprintf('The service "%s" has a dependency on a non-existent service "%s".', $sourceId, $id);
+            $msg = sprintf('The version "%s" has a dependency on a non-existent version "%s" for service "%s".', $sourceId, $version, $id);
         }
 
         $countAlternatives = count($alternatives);
@@ -46,6 +48,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
         parent::__construct($msg, 0, $previous);
 
         $this->id = $id;
+        $this->version = $version;
         $this->sourceId = $sourceId;
         $this->alternatives = $alternatives;
     }
@@ -53,6 +56,11 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function getVersion(): string
+    {
+        return $this->version;
     }
 
     public function getSourceId(): ?string

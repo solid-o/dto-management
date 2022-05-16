@@ -14,7 +14,7 @@ class ServiceLocatorTest extends TestCase
 {
     public function testHasShouldWork(): void
     {
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\SemVerModel\Interfaces\UserInterface::class, [
             '1.0' => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
             '1.1' => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
         ]);
@@ -27,7 +27,7 @@ class ServiceLocatorTest extends TestCase
 
     public function testHasShouldWorkWithIntegerVersions(): void
     {
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\SemVerModel\Interfaces\UserInterface::class, [
             20210316 => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
             20210318 => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
         ]);
@@ -42,7 +42,7 @@ class ServiceLocatorTest extends TestCase
 
     public function testGetLatestShouldReturnTheLatestVersion(): void
     {
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\SemVerModel\Interfaces\UserInterface::class, [
             '2.0' => fn () => new Fixtures\SemVerModel\v2\v2_0_alpha_1\User(),
             '1.1' => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
             '1.0' => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
@@ -56,7 +56,7 @@ class ServiceLocatorTest extends TestCase
 
     public function testGetShouldGetTheCorrectDtoVersion(): void
     {
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\SemVerModel\Interfaces\UserInterface::class, [
             '1.0' => fn () => new Fixtures\SemVerModel\v1\v1_0\User(),
             '1.1' => fn () => new Fixtures\SemVerModel\v1\v1_1\User(),
             '2.0' => fn () => new Fixtures\SemVerModel\v2\v2_0_alpha_1\User(),
@@ -73,7 +73,7 @@ class ServiceLocatorTest extends TestCase
         $this->expectExceptionCode(0);
         $this->expectExceptionMessage('Circular reference detected for service "0.1", path: "0.1 -> 0.1".');
 
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\Model\Interfaces\UserInterface::class, [
             '0.1' => static function () use (&$locator) {
                 return new Fixtures\Model\v2017\v20171215\Circular($locator);
             },
@@ -91,9 +91,9 @@ class ServiceLocatorTest extends TestCase
     public function testGetShouldThrowOnInvalidVersion(): void
     {
         $this->expectException(ServiceNotFoundException::class);
-        $this->expectDeprecationMessage('You have requested a non-existent service "0.1".');
+        $this->expectDeprecationMessage('You have requested a non-existent version "0.1" for service "Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface".');
 
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\Model\Interfaces\UserInterface::class, [
             '1.0' => static function () use (&$locator) {
                 return new Fixtures\Model\v2017\v20171215\Circular($locator);
             },
@@ -102,7 +102,8 @@ class ServiceLocatorTest extends TestCase
         try {
             $locator->get('0.1');
         } catch (ServiceNotFoundException $e) {
-            self::assertEquals('0.1', $e->getId());
+            self::assertEquals(Fixtures\Model\Interfaces\UserInterface::class, $e->getId());
+            self::assertEquals('0.1', $e->getVersion());
             self::assertNull($e->getSourceId());
             self::assertEquals(['1.0'], $e->getAlternatives());
             throw $e;
@@ -112,9 +113,9 @@ class ServiceLocatorTest extends TestCase
     public function testGetShouldThrowOnNonResolvableService(): void
     {
         $this->expectException(ServiceNotFoundException::class);
-        $this->expectExceptionMessage('The service "1.0" has a dependency on a non-existent service "0.1". Did you mean this: "1.0"?');
+        $this->expectExceptionMessage('The version "1.0" has a dependency on a non-existent version "0.1" for service "Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface". Did you mean this: "1.0"?');
 
-        $locator = new ServiceLocator([
+        $locator = new ServiceLocator(Fixtures\Model\Interfaces\UserInterface::class, [
             '1.0' => static function () use (&$locator) {
                 return new Fixtures\Model\v2017\v20171215\Circular($locator);
             },

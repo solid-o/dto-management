@@ -15,10 +15,13 @@ use function Safe\uksort;
 use function version_compare;
 
 /**
+ * @internal
+ *
  * @template T of object
  */
 class ServiceLocator implements ContainerInterface
 {
+    private string $interfaceName;
     /** @var array<string, callable|true> */
     private array $factories;
     /** @var array<string, string> */
@@ -27,8 +30,9 @@ class ServiceLocator implements ContainerInterface
     /**
      * @param array<string, callable> $factories
      */
-    public function __construct(array $factories)
+    public function __construct(string $interfaceName, array $factories)
     {
+        $this->interfaceName = $interfaceName;
         $this->factories = $factories;
         $this->loading = [];
         uksort($this->factories, 'version_compare');
@@ -67,7 +71,7 @@ class ServiceLocator implements ContainerInterface
         }
 
         if ($last === null) {
-            throw new ServiceNotFoundException($id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
+            throw new ServiceNotFoundException($this->interfaceName, $id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
         }
 
         $factory = $this->factories[$last];
