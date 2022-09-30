@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Solido\DtoManagement\Finder;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
 use Solido\DtoManagement\Exception\ServiceNotFoundException;
 
 use function array_key_last;
 use function array_keys;
+use function assert;
 use function end;
+use function is_string;
 use function Safe\uksort;
+use function str_replace;
 use function version_compare;
 
 /**
@@ -26,15 +30,19 @@ class ServiceLocator implements ContainerInterface
     private array $factories;
     /** @var array<string, string> */
     private array $loading;
+    private ?CacheItemPoolInterface $cache;
+    private string $cacheItemPrefix;
 
     /**
      * @param array<string, callable> $factories
      */
-    public function __construct(string $interfaceName, array $factories)
+    public function __construct(string $interfaceName, array $factories, ?CacheItemPoolInterface $cache = null)
     {
         $this->interfaceName = $interfaceName;
         $this->factories = $factories;
         $this->loading = [];
+        $this->cache = $cache;
+        $this->cacheItemPrefix = str_replace('\\', '', $this->interfaceName) . '_';
         uksort($this->factories, 'version_compare');
     }
 
@@ -55,23 +63,35 @@ class ServiceLocator implements ContainerInterface
      */
     public function get($id): object
     {
+        $last = null;
         if ($id === 'latest') {
             $id = array_key_last($this->factories);
         }
 
         $id = (string) $id;
-        $last = null;
+        $cacheItem = $this->cache !== null ? $this->cache->getItem($this->cacheItemPrefix . $id) : null;
+        if ($cacheItem !== null && $cacheItem->isHit()) {
+            $last = $cacheItem->get();
+            assert(is_string($last));
+        } else {
+            foreach ($this->factories as $version => $service) {
+                $version = (string) $version;
+                if (! version_compare($version, $id, '<=')) {
+                    break;
+                }
 
-        foreach ($this->factories as $version => $service) {
-            if (! version_compare((string) $version, $id, '<=')) {
-                break;
+                $last = $version;
             }
 
-            $last = $version;
-        }
+            if ($last === null) {
+                throw new ServiceNotFoundException($this->interfaceName, $id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
+            }
 
-        if ($last === null) {
-            throw new ServiceNotFoundException($this->interfaceName, $id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
+            if ($cacheItem !== null) {
+                $cacheItem->set($last);
+                assert($this->cache !== null);
+                $this->cache->saveDeferred($cacheItem);
+            }
         }
 
         $factory = $this->factories[$last];

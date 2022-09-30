@@ -10,6 +10,7 @@ use Solido\DtoManagement\Finder\ArgumentResolver\Argument;
 use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentValueResolverInterface;
 use Solido\DtoManagement\Finder\RegistryBuilder;
 use Solido\DtoManagement\Tests\Fixtures;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class RegistryBuilderTest extends TestCase
 {
@@ -19,6 +20,7 @@ class RegistryBuilderTest extends TestCase
     {
         $builder = new RegistryBuilder(Fixtures\SemVerModel::class);
         $builder->excludeInterface(Fixtures\SemVerModel\Interfaces\UserInterface::class);
+        $builder->withCacheItemPool(new ArrayAdapter());
         $registry = $builder->build();
 
         self::assertFalse($registry->has(Fixtures\SemVerModel\Interfaces\UserInterface::class));
@@ -31,6 +33,7 @@ class RegistryBuilderTest extends TestCase
     public function testShouldNotCollectDTOsWithWrongNamespacePattern(): void
     {
         $builder = new RegistryBuilder(Fixtures\SemVerModel::class);
+        $builder->withCacheItemPool(new ArrayAdapter());
         $registry = $builder->build();
 
         self::assertTrue($registry->has(Fixtures\SemVerModel\Interfaces\UserInterface::class));
@@ -44,6 +47,7 @@ class RegistryBuilderTest extends TestCase
     public function testUnresolvableServicesShouldCauseAnExceptionToBeThrownWhenOnResolving(): void
     {
         $builder = new RegistryBuilder(Fixtures\ServicedModel::class);
+        $builder->withCacheItemPool(new ArrayAdapter());
         $registry = $builder->build();
 
         $locator = $registry->get(Fixtures\ServicedModel\Interfaces\FooInterface::class);
@@ -56,6 +60,7 @@ class RegistryBuilderTest extends TestCase
     public function testDTOsWithNullableAndDefaultArgumentsShouldBeCreatedCorrectly(): void
     {
         $builder = new RegistryBuilder(Fixtures\ServicedModel::class);
+        $builder->withCacheItemPool(new ArrayAdapter());
         $registry = $builder->build();
 
         $locator = $registry->get(Fixtures\ServicedModel\Interfaces\FooInterface::class);

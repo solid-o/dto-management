@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Solido\DtoManagement\Finder;
 
 use Kcs\ClassFinder\Finder\ComposerFinder;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentResolver;
@@ -25,6 +26,7 @@ class RegistryBuilder
 {
     private ?AccessInterceptorFactory $proxyFactory = null;
     private string $namespace;
+    private ?CacheItemPoolInterface $cache = null;
 
     /**
      * @var array<string, bool>
@@ -65,6 +67,13 @@ class RegistryBuilder
         return $this;
     }
 
+    public function withCacheItemPool(CacheItemPoolInterface $cachePool): self
+    {
+        $this->cache = $cachePool;
+
+        return $this;
+    }
+
     public function withServiceContainer(ContainerInterface $container): self
     {
         return $this->withArgumentValueResolver(new ServiceContainerArgumentValueResolver($container));
@@ -74,6 +83,7 @@ class RegistryBuilder
     {
         $proxyFactory = $this->proxyFactory ?? new AccessInterceptorFactory();
         $argumentResolver = new ArgumentResolver([...$this->argumentValueResolvers, new DefaultValueArgumentValueResolver(), new NullArgumentValueResolver()]);
+        $cache = $this->cache;
 
         $finder = new ComposerFinder();
         $finder->inNamespace($this->namespace);
@@ -96,7 +106,7 @@ class RegistryBuilder
                 return new $proxyClass(...$constructorArguments);
             }, $versions);
 
-            $locators[$interface] = static fn () => new ServiceLocator($interface, $factories);
+            $locators[$interface] = static fn () => new ServiceLocator($interface, $factories, $cache);
         }
 
         return new ServiceLocatorRegistry($locators);
