@@ -15,9 +15,7 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
     /** @phpstan-var array<class-string, callable(): ServiceLocator> */
     private array $locators;
 
-    /**
-     * @phpstan-param array<class-string, callable(): ServiceLocator> $locators
-     */
+    /** @phpstan-param array<class-string, callable(): ServiceLocator> $locators */
     public function __construct(array $locators)
     {
         $this->locators = $locators;
@@ -52,9 +50,7 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
         return $builder->build();
     }
 
-    /**
-     * @phpstan-param class-string $interface
-     */
+    /** @phpstan-param class-string $interface */
     public function get(string $interface): ServiceLocator
     {
         if (! isset($this->locators[$interface])) {
@@ -64,9 +60,7 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
         return $this->locators[$interface]();
     }
 
-    /**
-     * @phpstan-param class-string $interface
-     */
+    /** @phpstan-param class-string $interface */
     public function has(string $interface): bool
     {
         return isset($this->locators[$interface]);

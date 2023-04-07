@@ -60,6 +60,6 @@
         }
     },
     "archive": {
-        "exclude": [ ".gitignore", ".travis.yml", "tests" ]
+        "exclude": [ ".gitignore", "tests" ]
     }
 }

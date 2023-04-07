@@ -15,9 +15,7 @@ class ArgumentResolver implements ArgumentResolverInterface
     /** @var ArgumentValueResolverInterface[] */
     private array $resolvers;
 
-    /**
-     * @param ArgumentValueResolverInterface[] $resolvers
-     */
+    /** @param ArgumentValueResolverInterface[] $resolvers */
     public function __construct(array $resolvers)
     {
         $this->resolvers = (static fn (ArgumentValueResolverInterface ...$val) => $val)(...$resolvers);

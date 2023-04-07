@@ -1,8 +1,11 @@
 name: Tests
 on:
     push:
+        branches:
+            - master
+
     pull_request_target:
-        types: [opened, synchronize]
+        types: [ opened, synchronize ]
 
 jobs:
     build:
@@ -13,6 +16,7 @@ jobs:
                     - '7.4'
                     - '8.0'
                     - '8.1'
+                    - '8.2'
 
         name: PHP ${{ matrix.php_version }}
         steps:
@@ -24,7 +28,7 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php_version }}
-                  tools: 'infection:0.26.6'
+                  tools: ${{ matrix.php_version == '7.4' && 'infection:0.26.6' || 'infection' }}
                   ini-values: zend.assertions=1,assert.exception=1,assert.active=1
                   coverage: pcov
 

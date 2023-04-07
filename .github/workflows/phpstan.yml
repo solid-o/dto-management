@@ -2,31 +2,34 @@ name: PHPStan
 
 on:
     push:
-    pull_request:
-        types: [opened]
+        branches:
+            - master
+
+    pull_request_target:
+        types: [ opened, synchronize ]
 
 jobs:
     build:
+        env:
+            COMPOSER_ROOT_VERSION: dev-master
+
         runs-on: ubuntu-latest
         name: Static analysis
         steps:
-            -   uses: actions/checkout@v2
-                with:
-                    fetch-depth: 0
+            -   uses: actions/checkout@v3
 
             -   name: Install PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     coverage: none
-                    php-version: "8.0"
+                    php-version: "8.1"
                     tools: cs2pr
 
-            -   name: Install dependencies with composer
-                run: composer install
-
-            -   if: ${{ github.base_ref == '' }}
-                run: composer phpstan
+            - name: Install Composer dependencies
+              uses: ramsey/composer-install@v2
+              with:
+                  # Bust the cache at least once a month - output format: YYYY-MM.
+                  custom-cache-suffix: $(date -u "+%Y-%m")
 
             -   name: Run a static analysis with phpstan/phpstan
-                if: ${{ github.base_ref != '' }}
-                run: composer phpstan -- --error-format=checkstyle | cs2pr
+                run: php vendor/bin/phpstan analyse src/ -c vendor/solido/php-coding-standards/phpstan.neon --level=8 --no-progress -vvv --memory-limit=2048M --error-format=checkstyle | cs2pr

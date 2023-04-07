@@ -80,8 +80,8 @@ $returnValue = (function () use (&$value) {
 ', $code, self::INTERCEPTOR_SET_RETURN)),
                 array_map(
                     static fn (Interceptor $interceptor) => str_replace("\n", "\n    ", $interceptor->getCode()),
-                    $interceptors
-                )
+                    $interceptors,
+                ),
             );
 
             $body .= sprintf("    case '%s': \n", $propertyName);

@@ -17,9 +17,7 @@ class Configuration extends BaseConfiguration
         $this->extensions[] = $extension;
     }
 
-    /**
-     * @return ExtensionInterface[]
-     */
+    /** @return ExtensionInterface[] */
     public function getExtensions(): array
     {
         return $this->extensions;

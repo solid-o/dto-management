@@ -2,17 +2,20 @@ name: Check CS
 
 on:
     push:
-    pull_request:
-        types: [opened]
+        branches:
+            - master
+
+    pull_request_target:
+        types: [ opened, synchronize ]
 
 jobs:
     build:
         runs-on: ubuntu-latest
         name: Check code style
         steps:
-            -   uses: actions/checkout@v2
+            -   uses: actions/checkout@v3
                 with:
-                    fetch-depth: 0
+                    fetch-depth: 10
 
             -   name: Install PHP
                 uses: shivammathur/setup-php@v2
@@ -21,12 +24,11 @@ jobs:
                     php-version: "7.4"
                     tools: cs2pr
 
-            -   name: Install dependencies with composer
-                run: composer install
+            - name: Install Composer dependencies
+              uses: ramsey/composer-install@v2
+              with:
+                  # Bust the cache at least once a month - output format: YYYY-MM.
+                  custom-cache-suffix: $(date -u "+%Y-%m")
 
-            -   if: ${{ github.base_ref == '' }}
-                run: composer cscheck
-
-            -   name: Run diff-sniffer
-                if: ${{ github.base_ref != '' }}
+            -   name: Run git-phpcs
                 run: composer cscheck -- --report=checkstyle | cs2pr

@@ -43,9 +43,7 @@ class RegistryBuilder
         $this->argumentValueResolvers = [];
     }
 
-    /**
-     * @phpstan-param class-string $interface
-     */
+    /** @phpstan-param class-string $interface */
     public function excludeInterface(string $interface): self
     {
         $this->excludedInterface[$interface] = true;
@@ -123,9 +121,7 @@ class RegistryBuilder
         $interfaces = [];
         $modelsByInterface = [];
 
-        /**
-         * @phpstan-var class-string $class
-         */
+        /** @phpstan-var class-string $class */
         foreach ($finder as $class => $reflector) {
             assert(is_string($class));
             assert($reflector instanceof ReflectionClass);

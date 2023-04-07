@@ -30,7 +30,7 @@ class MagicGet extends MagicMethodGenerator
             PublicScopeSimulator::OPERATION_GET,
             'name',
             $valueHolder,
-            'returnValue'
+            'returnValue',
         );
 
         if (! $publicProperties->isEmpty()) {

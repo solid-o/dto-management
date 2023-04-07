@@ -17,9 +17,7 @@ class ServiceCircularReferenceException extends RuntimeException implements Cont
     private array $path;
     private string $serviceId;
 
-    /**
-     * @param string[] $path
-     */
+    /** @param string[] $path */
     public function __construct(string $serviceId, array $path, ?Throwable $previous = null)
     {
         parent::__construct(sprintf('Circular reference detected for service "%s", path: "%s".', $serviceId, implode(' -> ', $path)), 0, $previous);
@@ -33,9 +31,7 @@ class ServiceCircularReferenceException extends RuntimeException implements Cont
         return $this->serviceId;
     }
 
-    /**
-     * @return string[]
-     */
+    /** @return string[] */
     public function getPath(): array
     {
         return $this->path;

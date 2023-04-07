@@ -26,7 +26,7 @@ use function count;
 use function implode;
 use function in_array;
 use function interface_exists;
-use function Safe\sprintf;
+use function sprintf;
 
 class ProxyBuilder
 {
@@ -42,7 +42,7 @@ class ProxyBuilder
 
     /**
      * @var array<string, array<mixed>>
-     * @phpstan-var array<class-string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     * @phpstan-var array<class-string, array{aliases: array{method: non-empty-string, alias: non-empty-string, visibility?: ReflectionMethod::IS_PUBLIC|ReflectionMethod::IS_PRIVATE|ReflectionMethod::IS_PROTECTED}[], overrides: array{method: string, traitToReplace: string}[]}>
      */
     private array $traits;
 
@@ -158,8 +158,8 @@ class ProxyBuilder
      * @param array<string, mixed> $aliases
      * @param array<string, string> $overrides
      * @phpstan-param class-string $traitName
-     * @phpstan-param array{method: string, alias: string, visibility?: int}[] $aliases
-     * @phpstan-param array{method: string, traitToReplace: string}[] $overrides
+     * @phpstan-param array{method: non-empty-string, alias: non-empty-string, visibility?: ReflectionMethod::IS_PUBLIC|ReflectionMethod::IS_PRIVATE|ReflectionMethod::IS_PROTECTED}[] $aliases
+     * @phpstan-param array{method: non-empty-string, traitToReplace: non-empty-string}[] $overrides
      */
     public function addTrait(string $traitName, array $aliases = [], array $overrides = []): void
     {
@@ -177,7 +177,7 @@ class ProxyBuilder
      * Gets the traits to be added to the proxy.
      *
      * @return array<string, mixed>
-     * @phpstan-return array<class-string, array{aliases: array{method: string, alias: string, visibility?: int}[], overrides: array{method: string, traitToReplace: string}[]}>
+     * @phpstan-return array<class-string, array{aliases: array{method: non-empty-string, alias: non-empty-string, visibility?: ReflectionMethod::IS_PUBLIC|ReflectionMethod::IS_PRIVATE|ReflectionMethod::IS_PROTECTED}[], overrides: array{method: string, traitToReplace: string}[]}>
      */
     public function getTraits(): array
     {

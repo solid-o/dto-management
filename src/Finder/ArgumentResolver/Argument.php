@@ -18,9 +18,7 @@ class Argument
     private bool $isVariadic;
     private bool $allowsNull;
 
-    /**
-     * @param mixed $defaultValue
-     */
+    /** @param mixed $defaultValue */
     public function __construct(string $className, string $parameterName, ?ReflectionType $parameterType, bool $hasDefault, $defaultValue, bool $isVariadic, bool $allowsNull)
     {
         $this->className = $className;
@@ -47,9 +45,7 @@ class Argument
         return $this->parameterType;
     }
 
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function getDefaultValue()
     {
         return $this->defaultValue;

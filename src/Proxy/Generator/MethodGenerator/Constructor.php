@@ -51,7 +51,7 @@ class Constructor extends MethodGenerator
             '$this->' . $valueHolder->getName() . ' = ' . self::generateAnonymousClassValueHolder($properties, $originalClass->getDefaultProperties()) . "\n"
             . self::generateUnsetAccessiblePropertiesCode($properties)
             . self::generateOriginalConstructorCall($originalClass)
-            . $proxyBuilder->getConstructorCode()
+            . $proxyBuilder->getConstructorCode(),
         );
 
         return $constructor;
@@ -82,15 +82,13 @@ class Constructor extends MethodGenerator
     {
         $constructors = array_map(
             static fn (ReflectionMethod $method) => new MethodReflection($method->getDeclaringClass()->getName(), $method->getName()),
-            array_filter($class->getMethods(), static fn (ReflectionMethod $method) => $method->isConstructor())
+            array_filter($class->getMethods(), static fn (ReflectionMethod $method) => $method->isConstructor()),
         );
 
         return reset($constructors) ?: null;
     }
 
-    /**
-     * @param array<string, mixed> $defaults
-     */
+    /** @param array<string, mixed> $defaults */
     private static function generateAnonymousClassValueHolder(Properties $properties, array $defaults): string
     {
         $accessibleProperties = $properties->getAccessibleProperties();
@@ -114,9 +112,7 @@ class Constructor extends MethodGenerator
         return self::generateUnsetStatement($accessibleProperties) . "\n\n";
     }
 
-    /**
-     * @param array<string, ReflectionProperty> $properties
-     */
+    /** @param array<string, ReflectionProperty> $properties */
     private static function generateUnsetStatement(array $properties): string
     {
         $generator = static fn (ReflectionProperty $property) => '$this->' . $property->getName();

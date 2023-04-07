@@ -14,8 +14,8 @@ use function array_keys;
 use function assert;
 use function end;
 use function is_string;
-use function Safe\uksort;
 use function str_replace;
+use function uksort;
 use function version_compare;
 
 /**
@@ -33,9 +33,7 @@ class ServiceLocator implements ContainerInterface
     private ?CacheItemPoolInterface $cache;
     private string $cacheItemPrefix;
 
-    /**
-     * @param array<string, callable> $factories
-     */
+    /** @param array<string, callable> $factories */
     public function __construct(string $interfaceName, array $factories, ?CacheItemPoolInterface $cache = null)
     {
         $this->interfaceName = $interfaceName;
@@ -43,7 +41,7 @@ class ServiceLocator implements ContainerInterface
         $this->loading = [];
         $this->cache = $cache;
         $this->cacheItemPrefix = str_replace('\\', '', $this->interfaceName) . '_';
-        uksort($this->factories, 'version_compare');
+        uksort($this->factories, static fn (string $a, string $b): int => version_compare($a, $b));
     }
 
     /**

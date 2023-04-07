@@ -24,9 +24,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
     /** @var string[] */
     private array $alternatives;
 
-    /**
-     * @param string[] $alternatives
-     */
+    /** @param string[] $alternatives */
     public function __construct(string $id, string $version, ?string $sourceId = null, ?Throwable $previous = null, array $alternatives = [], ?string $msg = null)
     {
         $version = $version ?: 'latest';
@@ -41,7 +39,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
             $msg .= sprintf(
                 ' Did you mean %s: "%s"?',
                 $countAlternatives > 1 ? 'one of these' : 'this',
-                implode('", "', $alternatives)
+                implode('", "', $alternatives),
             );
         }
 
@@ -68,9 +66,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
         return $this->sourceId;
     }
 
-    /**
-     * @return string[]
-     */
+    /** @return string[] */
     public function getAlternatives(): array
     {
         return $this->alternatives;

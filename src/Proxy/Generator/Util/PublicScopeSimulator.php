@@ -52,7 +52,7 @@ class PublicScopeSimulator
             . '$accessor = function ' . $byRef . '() use ('
             . implode(', ', array_map(
                 static fn (string $parameterName): string => '$' . $parameterName,
-                ['targetObject', $nameParameter]
+                ['targetObject', $nameParameter],
             ))
             . ') {' . "\n"
             . '    ' . self::getOperation($operationType, $nameParameter) . "\n"

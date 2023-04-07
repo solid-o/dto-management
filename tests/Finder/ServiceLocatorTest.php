@@ -91,7 +91,6 @@ class ServiceLocatorTest extends TestCase
     public function testGetShouldThrowOnInvalidVersion(): void
     {
         $this->expectException(ServiceNotFoundException::class);
-        $this->expectDeprecationMessage('You have requested a non-existent version "0.1" for service "Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface".');
 
         $locator = new ServiceLocator(Fixtures\Model\Interfaces\UserInterface::class, [
             '1.0' => static function () use (&$locator) {

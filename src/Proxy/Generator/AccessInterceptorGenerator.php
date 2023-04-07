@@ -34,9 +34,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
     /** @var iterable<ExtensionInterface> */
     private iterable $extensions;
 
-    /**
-     * @param iterable<ExtensionInterface> $extensions
-     */
+    /** @param iterable<ExtensionInterface> $extensions */
     public function __construct(iterable $extensions)
     {
         $this->extensions = $extensions;
@@ -144,7 +142,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
 })();
 
 %s', $forwardedParams ? ' use (' . implode(', ', $interceptorParams) . ')' : '', '    ' . str_replace("\n", "\n    ", $interceptor->getCode()), $returnValue),
-            $interceptors
+            $interceptors,
         );
 
         $body = implode("\n", $interceptorCode)
