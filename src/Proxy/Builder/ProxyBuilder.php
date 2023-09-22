@@ -29,6 +29,8 @@ use function in_array;
 use function interface_exists;
 use function sprintf;
 
+use const PHP_VERSION_ID;
+
 class ProxyBuilder
 {
     private const MAGIC_METHODS = [
