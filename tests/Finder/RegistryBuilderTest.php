@@ -5,6 +5,7 @@ namespace Solido\DtoManagement\Tests\Finder;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument as ProphecyArgument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Solido\DtoManagement\Exception\InvalidVersionException;
 use Solido\DtoManagement\Exception\RuntimeException;
 use Solido\DtoManagement\Finder\ArgumentResolver\Argument;
 use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentValueResolverInterface;
@@ -88,5 +89,15 @@ class RegistryBuilderTest extends TestCase
 
         $locator = $registry->get(Fixtures\ServicedModel\Interfaces\FooInterface::class);
         $locator->get('1.0');
+    }
+
+    public function testShouldThrowIfMoreThanOneImplementationsIsFoundForASingleVersion(): void
+    {
+        $builder = new RegistryBuilder(Fixtures\ConflictModel::class);
+        $builder->withCacheItemPool(new ArrayAdapter());
+
+        $this->expectException(InvalidVersionException::class);
+        $this->expectExceptionMessage('Interface "Solido\DtoManagement\Tests\Fixtures\ConflictModel\Interfaces\UserInterface" is already implemented for version 20171215');
+        $builder->build();
     }
 }
