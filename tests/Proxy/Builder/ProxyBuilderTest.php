@@ -22,6 +22,7 @@ use Solido\DtoManagement\Tests\Fixtures\BarInterface;
 use Solido\DtoManagement\Tests\Fixtures\FinalClass;
 use Solido\DtoManagement\Tests\Fixtures\Model\Interfaces\UserInterface;
 use Solido\DtoManagement\Tests\Fixtures\ProxableClass;
+use Solido\DtoManagement\Tests\Fixtures\ReadOnlyClass;
 use Solido\DtoManagement\Tests\Fixtures\UserTrait;
 
 class ProxyBuilderTest extends TestCase
@@ -30,6 +31,15 @@ class ProxyBuilderTest extends TestCase
     {
         $this->expectException(InvalidProxiedClassException::class);
         new ProxyBuilder(new ReflectionClass(FinalClass::class));
+    }
+
+    /**
+     * @requires PHP >= 8.2
+     */
+    public function testShouldThrowIfClassIsReadonlyAndCannotBeProxied(): void
+    {
+        $this->expectException(InvalidProxiedClassException::class);
+        new ProxyBuilder(new ReflectionClass(ReadOnlyClass::class));
     }
 
     public function testShouldThrowOnInterfaces(): void

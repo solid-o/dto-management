@@ -6,6 +6,7 @@ namespace Solido\DtoManagement\Proxy\Builder;
 
 use Laminas\Code\Generator\MethodGenerator;
 use Laminas\Code\Generator\PropertyGenerator;
+use ProxyManager\Exception\InvalidProxiedClassException;
 use ProxyManager\ProxyGenerator\Assertion\CanProxyAssertion;
 use ProxyManager\ProxyGenerator\Util\Properties;
 use ReflectionClass;
@@ -82,6 +83,9 @@ class ProxyBuilder
     public function __construct(ReflectionClass $class)
     {
         CanProxyAssertion::assertClassCanBeProxied($class, false);
+        if (PHP_VERSION_ID >= 80200 && $class->isReadOnly()) {
+            throw new InvalidProxiedClassException(sprintf('Provided class "%s" is readonly and cannot be proxied', $class->getName()));
+        }
 
         $this->class = $class;
         $this->properties = Properties::fromReflectionClass($class);
