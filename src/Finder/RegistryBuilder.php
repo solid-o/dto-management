@@ -8,6 +8,7 @@ use Kcs\ClassFinder\Finder\ComposerFinder;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use Solido\DtoManagement\Exception\InvalidVersionException;
 use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentResolver;
 use Solido\DtoManagement\Finder\ArgumentResolver\ArgumentValueResolverInterface;
 use Solido\DtoManagement\Finder\ArgumentResolver\DefaultValueArgumentValueResolver;
@@ -142,6 +143,10 @@ class RegistryBuilder
             assert(is_string($version));
 
             foreach ($reflector->getInterfaces() as $interface) {
+                if (isset($modelsByInterface[$interface->getName()][$version])) {
+                    throw new InvalidVersionException(sprintf('Interface "%s" is already implemented for version %s', $interface->getName(), $version));
+                }
+
                 $modelsByInterface[$interface->getName()][$version] = $reflector->getName();
             }
         }
