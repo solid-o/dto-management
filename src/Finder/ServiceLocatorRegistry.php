@@ -12,13 +12,9 @@ use function array_keys;
 
 class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
 {
-    /** @phpstan-var array<class-string, callable(): ServiceLocator> */
-    private array $locators;
-
     /** @phpstan-param array<class-string, callable(): ServiceLocator> $locators */
-    public function __construct(array $locators)
+    public function __construct(private readonly array $locators)
     {
-        $this->locators = $locators;
     }
 
     /**
@@ -30,8 +26,8 @@ class ServiceLocatorRegistry implements ServiceLocatorRegistryInterface
     public static function createFromNamespace(
         string $namespace,
         array $excludedInterfaces = [],
-        ?AccessInterceptorFactory $proxyFactory = null,
-        ?ContainerInterface $container = null
+        AccessInterceptorFactory|null $proxyFactory = null,
+        ContainerInterface|null $container = null,
     ): ServiceLocatorRegistryInterface {
         $builder = new RegistryBuilder($namespace);
 

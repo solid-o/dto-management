@@ -17,15 +17,10 @@ use function Safe\sprintf;
  */
 class ServiceNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
-    private string $id;
     private string $version;
-    private ?string $sourceId;
-
-    /** @var string[] */
-    private array $alternatives;
 
     /** @param string[] $alternatives */
-    public function __construct(string $id, string $version, ?string $sourceId = null, ?Throwable $previous = null, array $alternatives = [], ?string $msg = null)
+    public function __construct(private string $id, string $version, private string|null $sourceId = null, Throwable|null $previous = null, private array $alternatives = [], string|null $msg = null)
     {
         $version = $version ?: 'latest';
         if ($msg === null && $sourceId === null) {
@@ -45,10 +40,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
 
         parent::__construct($msg, 0, $previous);
 
-        $this->id = $id;
         $this->version = $version;
-        $this->sourceId = $sourceId;
-        $this->alternatives = $alternatives;
     }
 
     public function getId(): string
@@ -61,7 +53,7 @@ class ServiceNotFoundException extends InvalidArgumentException implements NotFo
         return $this->version;
     }
 
-    public function getSourceId(): ?string
+    public function getSourceId(): string|null
     {
         return $this->sourceId;
     }

@@ -31,17 +31,13 @@ use function str_replace;
 
 class AccessInterceptorGenerator implements ProxyGeneratorInterface
 {
-    /** @var iterable<ExtensionInterface> */
-    private iterable $extensions;
-
     /** @param iterable<ExtensionInterface> $extensions */
-    public function __construct(iterable $extensions)
+    public function __construct(private iterable $extensions)
     {
-        $this->extensions = $extensions;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @throws EmptyBuilderException
      * @throws ReflectionException

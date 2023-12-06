@@ -12,7 +12,7 @@ class DefaultValueArgumentValueResolver implements ArgumentValueResolverInterfac
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function resolve(Argument $argument): iterable
     {

@@ -8,26 +8,15 @@ use ReflectionType;
 
 class Argument
 {
-    private string $className;
-    private string $parameterName;
-    private ?ReflectionType $parameterType;
-    private bool $hasDefault;
-
-    /** @var mixed */
-    private $defaultValue;
-    private bool $isVariadic;
-    private bool $allowsNull;
-
-    /** @param mixed $defaultValue */
-    public function __construct(string $className, string $parameterName, ?ReflectionType $parameterType, bool $hasDefault, $defaultValue, bool $isVariadic, bool $allowsNull)
-    {
-        $this->className = $className;
-        $this->parameterName = $parameterName;
-        $this->parameterType = $parameterType;
-        $this->hasDefault = $hasDefault;
-        $this->defaultValue = $defaultValue;
-        $this->isVariadic = $isVariadic;
-        $this->allowsNull = $allowsNull;
+    public function __construct(
+        private readonly string $className,
+        private readonly string $parameterName,
+        private readonly ReflectionType|null $parameterType,
+        private readonly bool $hasDefault,
+        private readonly mixed $defaultValue,
+        private readonly bool $isVariadic,
+        private readonly bool $allowsNull,
+    ) {
     }
 
     public function getClassName(): string
@@ -40,13 +29,12 @@ class Argument
         return $this->parameterName;
     }
 
-    public function getParameterType(): ?ReflectionType
+    public function getParameterType(): ReflectionType|null
     {
         return $this->parameterType;
     }
 
-    /** @return mixed */
-    public function getDefaultValue()
+    public function getDefaultValue(): mixed
     {
         return $this->defaultValue;
     }

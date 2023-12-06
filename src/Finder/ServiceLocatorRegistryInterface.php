@@ -23,4 +23,12 @@ interface ServiceLocatorRegistryInterface
      * @phpstan-param class-string $interface
      */
     public function has(string $interface): bool;
+
+    /**
+     * Gets all the interfaces names registered in this registry.
+     *
+     * @return string[]
+     * @phpstan-return class-string[]
+     */
+    public function getInterfaces(): array;
 }

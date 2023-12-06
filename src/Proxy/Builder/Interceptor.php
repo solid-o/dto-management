@@ -9,13 +9,9 @@ namespace Solido\DtoManagement\Proxy\Builder;
  */
 class Interceptor
 {
-    private string $code;
-
-    public function __construct(string $code)
+    public function __construct(private string $code)
     {
         Util::assertValidPhpCode($code);
-
-        $this->code = $code;
     }
 
     /**

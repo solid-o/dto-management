@@ -13,12 +13,12 @@ use function assert;
 
 class AccessInterceptorFactory extends AbstractBaseFactory
 {
-    private ?ProxyGeneratorInterface $generator = null;
+    private ProxyGeneratorInterface|null $generator = null;
 
     /**
      * Not so useless: overwrite configuration type hint.
      */
-    public function __construct(?Configuration $configuration = null)
+    public function __construct(Configuration|null $configuration = null)
     {
         $configuration ??= new Configuration();
 
@@ -28,7 +28,7 @@ class AccessInterceptorFactory extends AbstractBaseFactory
     /**
      * Change visibility of generateProxy method (protected -> public).
      *
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function generateProxy(string $className, array $proxyOptions = []): string
     {

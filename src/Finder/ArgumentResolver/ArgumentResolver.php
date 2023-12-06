@@ -22,7 +22,7 @@ class ArgumentResolver implements ArgumentResolverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getArguments(string $className, string $method): iterable
     {

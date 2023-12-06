@@ -34,7 +34,7 @@ class PublicScopeSimulator
         string $operationType,
         string $nameParameter,
         PropertyGenerator $valueHolder,
-        string $returnPropertyName
+        string $returnPropertyName,
     ): string {
         $byRef  = self::getByRefReturnValue($operationType);
         $target = '$this->' . $valueHolder->getName();
@@ -102,7 +102,7 @@ class PublicScopeSimulator
     /**
      * Retrieves the logic to fetch the object on which access should be attempted
      */
-    private static function getTargetObject(?PropertyGenerator $valueHolder = null): string
+    private static function getTargetObject(PropertyGenerator|null $valueHolder = null): string
     {
         if ($valueHolder) {
             return '$this->' . $valueHolder->getName();

@@ -9,7 +9,7 @@ use Throwable;
 
 class EmptyBuilderException extends RuntimeException
 {
-    public function __construct(?Throwable $previous = null)
+    public function __construct(Throwable|null $previous = null)
     {
         parent::__construct('Proxy builder is empty, aborting proxy generation.', 0, $previous);
     }

@@ -16,17 +16,14 @@ use function Safe\sprintf;
 
 class Resolver implements ResolverInterface
 {
-    private ServiceLocatorRegistryInterface $registry;
-
-    public function __construct(ServiceLocatorRegistryInterface $registry)
+    public function __construct(private ServiceLocatorRegistryInterface $registry)
     {
-        $this->registry = $registry;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function resolve(string $interface, $version = null)
+    public function resolve(string $interface, mixed $version = null)
     {
         if ($version instanceof Request) {
             $version = $version->attributes->get('_version', 'latest');

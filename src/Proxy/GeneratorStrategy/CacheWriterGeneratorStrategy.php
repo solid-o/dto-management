@@ -18,12 +18,10 @@ use const DIRECTORY_SEPARATOR;
 
 class CacheWriterGeneratorStrategy implements GeneratorStrategyInterface
 {
-    private Configuration $configuration;
     private Closure $emptyErrorHandler;
 
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
-        $this->configuration = $configuration;
         $this->emptyErrorHandler = static function (): void {
             // Explicitly empty
         };

@@ -40,7 +40,6 @@ class ProxyBuilder
         '__construct',
     ];
 
-    public ReflectionClass $class;
     public Properties $properties;
 
     /**
@@ -82,14 +81,13 @@ class ProxyBuilder
     /** @var array<string, array<Interceptor>> */
     private array $propertyInterceptors = [];
 
-    public function __construct(ReflectionClass $class)
+    public function __construct(public ReflectionClass $class)
     {
         CanProxyAssertion::assertClassCanBeProxied($class, false);
         if (PHP_VERSION_ID >= 80200 && $class->isReadOnly()) {
             throw new InvalidProxiedClassException(sprintf('Provided class "%s" is readonly and cannot be proxied', $class->getName()));
         }
 
-        $this->class = $class;
         $this->properties = Properties::fromReflectionClass($class);
         $this->interfaces = [ProxyInterface::class];
         $this->traits = [];

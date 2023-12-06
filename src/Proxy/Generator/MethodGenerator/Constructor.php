@@ -78,7 +78,7 @@ class Constructor extends MethodGenerator
     /**
      * Retrieves the constructor.
      */
-    private static function getConstructor(ReflectionClass $class): ?MethodReflection
+    private static function getConstructor(ReflectionClass $class): MethodReflection|null
     {
         $constructors = array_map(
             static fn (ReflectionMethod $method) => new MethodReflection($method->getDeclaringClass()->getName(), $method->getName()),

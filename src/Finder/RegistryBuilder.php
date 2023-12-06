@@ -26,9 +26,8 @@ use function str_replace;
 
 class RegistryBuilder
 {
-    private ?AccessInterceptorFactory $proxyFactory = null;
-    private string $namespace;
-    private ?CacheItemPoolInterface $cache = null;
+    private AccessInterceptorFactory|null $proxyFactory = null;
+    private CacheItemPoolInterface|null $cache = null;
 
     /**
      * @var array<string, bool>
@@ -39,9 +38,8 @@ class RegistryBuilder
     /** @var ArgumentValueResolverInterface[] */
     private array $argumentValueResolvers;
 
-    public function __construct(string $namespace)
+    public function __construct(private string $namespace)
     {
-        $this->namespace = $namespace;
         $this->argumentValueResolvers = [];
     }
 

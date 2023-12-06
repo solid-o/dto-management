@@ -11,11 +11,8 @@ use function assert;
 
 class ServiceContainerArgumentValueResolver implements ArgumentValueResolverInterface
 {
-    private ContainerInterface $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(private readonly ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
     public function supports(Argument $argument): bool
@@ -28,7 +25,7 @@ class ServiceContainerArgumentValueResolver implements ArgumentValueResolverInte
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function resolve(Argument $argument): iterable
     {

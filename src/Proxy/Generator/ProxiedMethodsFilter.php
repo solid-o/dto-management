@@ -37,7 +37,7 @@ final class ProxiedMethodsFilter
      *
      * @return ReflectionMethod[]
      */
-    public static function getProxiedMethods(ReflectionClass $class, ?array $excluded = null): array
+    public static function getProxiedMethods(ReflectionClass $class, array|null $excluded = null): array
     {
         return self::doFilter($class, $excluded ?? self::$defaultExcluded);
     }

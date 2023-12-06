@@ -9,15 +9,9 @@ namespace Solido\DtoManagement\Proxy\Builder;
  */
 class Wrapper
 {
-    private string $head;
-    private string $tail;
-
-    public function __construct(string $head, string $tail)
+    public function __construct(private string $head, private string $tail)
     {
         Util::assertValidPhpCode($head . "\nassert(true);\n" . $tail);
-
-        $this->head = $head;
-        $this->tail = $tail;
     }
 
     /**

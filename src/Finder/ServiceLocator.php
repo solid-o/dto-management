@@ -25,29 +25,19 @@ use function version_compare;
  */
 class ServiceLocator implements ContainerInterface
 {
-    private string $interfaceName;
-    /** @var array<string, callable|true> */
-    private array $factories;
     /** @var array<string, string> */
     private array $loading;
-    private ?CacheItemPoolInterface $cache;
     private string $cacheItemPrefix;
 
     /** @param array<string, callable> $factories */
-    public function __construct(string $interfaceName, array $factories, ?CacheItemPoolInterface $cache = null)
+    public function __construct(private string $interfaceName, private array $factories, private CacheItemPoolInterface|null $cache = null)
     {
-        $this->interfaceName = $interfaceName;
-        $this->factories = $factories;
         $this->loading = [];
-        $this->cache = $cache;
         $this->cacheItemPrefix = str_replace('\\', '', $this->interfaceName) . '_';
         uksort($this->factories, static fn (string $a, string $b): int => version_compare($a, $b));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function has($id): bool
+    public function has(mixed $id): bool
     {
         $key = array_keys($this->factories)[0];
 
@@ -55,11 +45,11 @@ class ServiceLocator implements ContainerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @return T
      */
-    public function get($id): object
+    public function get(mixed $id): object
     {
         $last = null;
         if ($id === 'latest') {
@@ -67,7 +57,7 @@ class ServiceLocator implements ContainerInterface
         }
 
         $id = (string) $id;
-        $cacheItem = $this->cache !== null ? $this->cache->getItem($this->cacheItemPrefix . $id) : null;
+        $cacheItem = $this->cache?->getItem($this->cacheItemPrefix . $id);
         if ($cacheItem !== null && $cacheItem->isHit()) {
             $last = $cacheItem->get();
             assert(is_string($last));
@@ -93,11 +83,11 @@ class ServiceLocator implements ContainerInterface
         }
 
         $factory = $this->factories[$last];
-        if ($factory === true) {
+        if ($factory === true) { // @phpstan-ignore-line
             throw new ServiceCircularReferenceException($last, [$last, $last]);
         }
 
-        $this->factories[$last] = true;
+        $this->factories[$last] = true; // @phpstan-ignore-line
         $this->loading[$id] = $id;
         try {
             return $factory();
@@ -107,11 +97,11 @@ class ServiceLocator implements ContainerInterface
         }
     }
 
-    public function __invoke(string $id): ?object
+    public function __invoke(string $id): object|null
     {
         try {
             return $this->get($id);
-        } catch (ServiceNotFoundException $e) {
+        } catch (ServiceNotFoundException) {
             return null;
         }
     }

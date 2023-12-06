@@ -12,7 +12,7 @@ class NullArgumentValueResolver implements ArgumentValueResolverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function resolve(Argument $argument): iterable
     {

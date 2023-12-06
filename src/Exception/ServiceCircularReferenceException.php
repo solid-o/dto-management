@@ -13,17 +13,10 @@ use function Safe\sprintf;
 
 class ServiceCircularReferenceException extends RuntimeException implements ContainerExceptionInterface
 {
-    /** @var string[] */
-    private array $path;
-    private string $serviceId;
-
     /** @param string[] $path */
-    public function __construct(string $serviceId, array $path, ?Throwable $previous = null)
+    public function __construct(private string $serviceId, private array $path, Throwable|null $previous = null)
     {
         parent::__construct(sprintf('Circular reference detected for service "%s", path: "%s".', $serviceId, implode(' -> ', $path)), 0, $previous);
-
-        $this->path = $path;
-        $this->serviceId = $serviceId;
     }
 
     public function getServiceId(): string
