@@ -53,7 +53,7 @@ final class ProxiedMethodsFilter
 
         return array_filter(
             $class->getMethods(),
-            static fn (ReflectionMethod $method): bool => ! (array_key_exists(strtolower($method->getName()), $ignored) || self::methodCannotBeProxied($method))
+            static fn (ReflectionMethod $method): bool => ! (array_key_exists(strtolower($method->getName()), $ignored) || self::methodCannotBeProxied($method)),
         );
     }
 
