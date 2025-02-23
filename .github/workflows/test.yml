@@ -16,6 +16,7 @@ jobs:
                     - '8.1'
                     - '8.2'
                     - '8.3'
+                    - '8.4'
 
         name: PHP ${{ matrix.php_version }}
         steps:
@@ -35,6 +36,7 @@ jobs:
             - run: composer install
             - run: vendor/bin/phpunit --coverage-clover phpunit/phpunit.coverage.xml --coverage-xml phpunit/coverage-xml --log-junit phpunit/junit.xml
             - run: infection --threads=4 --logger-github --coverage=phpunit
+              if: matrix.php_version != '8.1'
 
             - name: Set repository name
               id: repository-name
@@ -48,7 +50,7 @@ jobs:
                   sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' junit.xml
 
             - name: SonarCloud Scan
-              uses: sonarsource/sonarcloud-github-action@v3
+              uses: sonarsource/sonarqube-scan-action@v5
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
