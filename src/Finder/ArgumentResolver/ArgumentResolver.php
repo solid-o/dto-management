@@ -8,7 +8,7 @@ use ReflectionClass;
 use Solido\DtoManagement\Exception\RuntimeException;
 
 use function get_debug_type;
-use function Safe\sprintf;
+use function sprintf;
 
 class ArgumentResolver implements ArgumentResolverInterface
 {

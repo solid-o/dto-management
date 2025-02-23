@@ -16,7 +16,7 @@ use Solido\DtoManagement\Proxy\Builder\ProxyBuilder;
 use function array_map;
 use function count;
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 use function str_replace;
 
 class MagicSet extends MagicMethodGenerator

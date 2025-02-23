@@ -10,7 +10,7 @@ use Throwable;
 
 use function count;
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 
 /**
  * This exception is thrown when a non-existent service is requested.

@@ -3,6 +3,7 @@
 namespace Solido\DtoManagement\Tests\InterfaceResolver;
 
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Solido\DtoManagement\Exception\InvalidArgumentException;
 use Solido\DtoManagement\Finder\ServiceLocator;
@@ -18,6 +19,7 @@ class ResolverTest extends TestCase
     /**
      * @dataProvider resolverVersionProvider
      */
+    #[DataProvider('resolverVersionProvider')]
     public function testGetShouldCallCorrectLocator($expected, $version): void
     {
         $registry = $this->prophesize(ServiceLocatorRegistry::class);
@@ -28,7 +30,7 @@ class ResolverTest extends TestCase
         self::assertSame($obj, $resolver->resolve('Interface', $version));
     }
 
-    public function resolverVersionProvider(): iterable
+    public static function resolverVersionProvider(): iterable
     {
         yield ['latest', null];
         yield ['latest', 'latest'];

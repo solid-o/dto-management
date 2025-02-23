@@ -9,7 +9,7 @@ use RuntimeException;
 use Throwable;
 
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 
 class ServiceCircularReferenceException extends RuntimeException implements ContainerExceptionInterface
 {

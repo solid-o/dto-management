@@ -9,7 +9,7 @@ use Laminas\Code\Generator\PropertyGenerator;
 
 use function array_map;
 use function implode;
-use function Safe\sprintf;
+use function sprintf;
 
 /**
  * Generates code necessary to simulate a fatal error in case of unauthorized

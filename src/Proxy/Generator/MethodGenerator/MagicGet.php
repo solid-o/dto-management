@@ -12,7 +12,7 @@ use ProxyManager\ProxyGenerator\Util\GetMethodIfExists;
 use ReflectionClass;
 use Solido\DtoManagement\Proxy\Generator\Util\PublicScopeSimulator;
 
-use function Safe\sprintf;
+use function sprintf;
 use function str_replace;
 
 class MagicGet extends MagicMethodGenerator
