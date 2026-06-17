@@ -42,6 +42,7 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
      * @throws EmptyBuilderException
      * @throws ReflectionException
      */
+
     /**
      * @param ReflectionClass<object> $originalClass
      * @param array<string, mixed> $options

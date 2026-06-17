@@ -21,7 +21,7 @@ use function str_replace;
 
 class MagicSet extends MagicMethodGenerator
 {
-    private const INTERCEPTOR_SET_RETURN = '
+    private const string INTERCEPTOR_SET_RETURN = '
 if ($returnValue instanceof ReturnValue) {
     return $returnValue->getValue();
 }

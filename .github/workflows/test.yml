@@ -4,7 +4,7 @@ on:
         branches:
             - master
 
-    pull_request_target:
+    pull_request:
         types: [ opened, synchronize ]
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
 
         name: PHP ${{ matrix.php_version }}
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v5
               with:
                 fetch-depth: 0
 
@@ -33,7 +33,6 @@ jobs:
             - run: composer install
             - run: vendor/bin/phpunit --coverage-clover phpunit/phpunit.coverage.xml --coverage-xml phpunit/coverage-xml --log-junit phpunit/junit.xml
             - run: infection --threads=4 --logger-github --coverage=phpunit
-              if: matrix.php_version != '8.1'
 
             - name: Set repository name
               id: repository-name

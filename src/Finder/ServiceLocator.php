@@ -40,11 +40,6 @@ class ServiceLocator implements ContainerInterface
         return version_compare((string) $id, (string) $key, '>=');
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return object
-     */
     public function get(mixed $id): object
     {
         $last = null;

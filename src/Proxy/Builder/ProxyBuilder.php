@@ -31,7 +31,7 @@ use function sprintf;
 
 class ProxyBuilder
 {
-    private const MAGIC_METHODS = [
+    private const array MAGIC_METHODS = [
         '__get',
         '__set',
         '__isset',

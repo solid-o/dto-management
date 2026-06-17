@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use Laminas\Code\Generator\PropertyGenerator;
 
 use function array_map;
-use function in_array;
 use function implode;
+use function in_array;
 use function sprintf;
 
 /**
@@ -19,8 +19,8 @@ use function sprintf;
  */
 class PublicScopeSimulator
 {
-    public const OPERATION_GET   = 'get';
-    public const OPERATION_ISSET = 'isset';
+    public const string OPERATION_GET   = 'get';
+    public const string OPERATION_ISSET = 'isset';
 
     /**
      * Generates code for simulating access to a property from the scope that is accessing a proxy.
@@ -116,9 +116,7 @@ class PublicScopeSimulator
         return '$realInstanceReflection->newInstanceWithoutConstructor()';
     }
 
-    /**
-     * @phpstan-param self::OPERATION_* $operationType
-     */
+    /** @phpstan-param self::OPERATION_* $operationType */
     private static function getOperation(string $operationType, string $nameParameter): string
     {
         if ($operationType === self::OPERATION_GET) {

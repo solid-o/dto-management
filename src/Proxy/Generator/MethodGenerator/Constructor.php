@@ -28,6 +28,7 @@ class Constructor extends MethodGenerator
     /**
      * Emits the code for constructor method.
      */
+
     /** @param ReflectionClass<object> $originalClass */
     public static function generateMethod(ReflectionClass $originalClass, PropertyGenerator $valueHolder, ProxyBuilder $proxyBuilder): self
     {
@@ -61,6 +62,7 @@ class Constructor extends MethodGenerator
     /**
      * Generates a parent constructor call.
      */
+
     /** @param ReflectionClass<object> $class */
     private static function generateOriginalConstructorCall(ReflectionClass $class): string
     {
@@ -80,6 +82,7 @@ class Constructor extends MethodGenerator
     /**
      * Retrieves the constructor.
      */
+
     /** @param ReflectionClass<object> $class */
     private static function getConstructor(ReflectionClass $class): MethodReflection|null
     {
