@@ -9,11 +9,7 @@ interface ServiceLocatorRegistryInterface
     /**
      * Gets a service locator for the given interface.
      *
-     * @phpstan-param class-string<T> $interface
-     *
-     * @return ServiceLocator<T>
-     *
-     * @template T of object
+     * @phpstan-param class-string $interface
      */
     public function get(string $interface): ServiceLocator;
 

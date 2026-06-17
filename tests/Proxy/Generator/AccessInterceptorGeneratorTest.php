@@ -59,7 +59,7 @@ class Proxy extends \Solido\DtoManagement\Tests\Proxy\Generator\TestInterceptedC
     /**
      * {@inheritDoc}
      */
-    public function interceptedMethod($obj) : void
+    public function interceptedMethod($obj): void
     {
         $returnValue = (function () use (&$obj) {
             // Do nothing
@@ -73,7 +73,7 @@ class Proxy extends \Solido\DtoManagement\Tests\Proxy\Generator\TestInterceptedC
     /**
      * {@inheritDoc}
      */
-    public function wrappedMethod() : void
+    public function wrappedMethod(): void
     {
         try {
         ;

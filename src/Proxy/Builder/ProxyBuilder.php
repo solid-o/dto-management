@@ -29,8 +29,6 @@ use function in_array;
 use function interface_exists;
 use function sprintf;
 
-use const PHP_VERSION_ID;
-
 class ProxyBuilder
 {
     private const MAGIC_METHODS = [
@@ -81,10 +79,11 @@ class ProxyBuilder
     /** @var array<string, array<Interceptor>> */
     private array $propertyInterceptors = [];
 
+    /** @param ReflectionClass<object> $class */
     public function __construct(public ReflectionClass $class)
     {
         CanProxyAssertion::assertClassCanBeProxied($class, false);
-        if (PHP_VERSION_ID >= 80200 && $class->isReadOnly()) {
+        if ($class->isReadOnly()) {
             throw new InvalidProxiedClassException(sprintf('Provided class "%s" is readonly and cannot be proxied', $class->getName()));
         }
 

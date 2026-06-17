@@ -27,6 +27,7 @@ if ($returnValue instanceof ReturnValue) {
 }
 ';
 
+    /** @param ReflectionClass<object> $originalClass */
     public function __construct(ReflectionClass $originalClass, PropertyGenerator $valueHolder, PublicPropertiesMap $publicProperties, ProxyBuilder $proxyBuilder)
     {
         parent::__construct($originalClass, '__set', [new ParameterGenerator('name'), new ParameterGenerator('value')]);

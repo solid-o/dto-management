@@ -19,7 +19,6 @@ use Solido\DtoManagement\Proxy\Factory\AccessInterceptorFactory;
 use function array_map;
 use function array_unshift;
 use function assert;
-use function is_string;
 use function Safe\preg_match;
 use function sprintf;
 use function str_replace;
@@ -111,8 +110,8 @@ class RegistryBuilder
     }
 
     /**
-     * @return array<string, ReflectionClass>|array<string, array<string, string>>
-     * @phpstan-return array{0: array<class-string, ReflectionClass>, 1: array<class-string, array<string, string>>}
+     * @return array<string, ReflectionClass<object>>|array<string, array<string, string>>
+     * @phpstan-return array{0: array<class-string, ReflectionClass<object>>, 1: array<class-string, array<string, string>>}
      */
     private function collectInterfaces(ComposerFinder $finder): array
     {
@@ -121,9 +120,7 @@ class RegistryBuilder
         $interfaces = [];
         $modelsByInterface = [];
 
-        /** @phpstan-var class-string $class */
         foreach ($finder as $class => $reflector) {
-            assert(is_string($class));
             assert($reflector instanceof ReflectionClass);
 
             if ($reflector->isInterface()) {
@@ -134,12 +131,12 @@ class RegistryBuilder
                 continue;
             }
 
-            if (! preg_match($versionPattern, $class, $m)) {
+            $m = [];
+            if (! preg_match($versionPattern, $class, $m) || ! isset($m[2])) {
                 continue;
             }
 
             $version = str_replace('_', '.', $m[2]);
-            assert(is_string($version));
 
             foreach ($reflector->getInterfaces() as $interface) {
                 if (isset($modelsByInterface[$interface->getName()][$version])) {

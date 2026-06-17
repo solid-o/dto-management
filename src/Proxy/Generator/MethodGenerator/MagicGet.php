@@ -17,6 +17,7 @@ use function str_replace;
 
 class MagicGet extends MagicMethodGenerator
 {
+    /** @param ReflectionClass<object> $originalClass */
     public function __construct(ReflectionClass $originalClass, ValueHolderProperty $valueHolder, PublicPropertiesMap $publicProperties)
     {
         parent::__construct($originalClass, '__get', [new ParameterGenerator('name')]);

@@ -23,11 +23,11 @@ class ResolverTest extends TestCase
     public function testGetShouldCallCorrectLocator($expected, $version): void
     {
         $registry = $this->prophesize(ServiceLocatorRegistry::class);
-        $registry->get('Interface')->willReturn($locator = $this->prophesize(ServiceLocator::class));
-        $locator->get($expected)->willReturn($obj = new \stdClass());
+        $registry->get(ResolverTestInterface::class)->willReturn($locator = $this->prophesize(ServiceLocator::class));
+        $locator->get($expected)->willReturn($obj = new ResolverTestSubject());
 
         $resolver = new Resolver($registry->reveal());
-        self::assertSame($obj, $resolver->resolve('Interface', $version));
+        self::assertSame($obj, $resolver->resolve(ResolverTestInterface::class, $version));
     }
 
     public static function resolverVersionProvider(): iterable
@@ -66,11 +66,19 @@ class ResolverTest extends TestCase
     public function testHasShouldForwardCallToRegistry(): void
     {
         $registry = $this->prophesize(ServiceLocatorRegistry::class);
-        $registry->has('Interface')->willReturn(true);
+        $registry->has(ResolverTestInterface::class)->willReturn(true);
         $registry->has('NonInterface')->willReturn(false);
 
         $resolver = new Resolver($registry->reveal());
-        self::assertTrue($resolver->has('Interface'));
+        self::assertTrue($resolver->has(ResolverTestInterface::class));
         self::assertFalse($resolver->has('NonInterface'));
     }
+}
+
+interface ResolverTestInterface
+{
+}
+
+class ResolverTestSubject implements ResolverTestInterface
+{
 }

@@ -30,14 +30,14 @@ class CacheWriterGeneratorStrategyTest extends TestCase
         $configuration->setGeneratorStrategy(new CacheWriterGeneratorStrategy($configuration));
 
         $generator = new AccessInterceptorFactory($configuration);
-        $className = $generator->generateProxy(self::class);
+        $className = $generator->generateProxy(CacheWriterGeneratorStrategyTestSubject::class);
 
         self::assertStringMatchesFormat(<<<'FILE'
-<?php namespace ProxyManagerGeneratedProxy\__PM__\Solido\DtoManagement\Tests\Proxy\GeneratorStrategy\CacheWriterGeneratorStrategyTest;
+<?php namespace ProxyManagerGeneratedProxy\__PM__\Solido\DtoManagement\Tests\Proxy\GeneratorStrategy\CacheWriterGeneratorStrategyTestSubject;
 
 use Solido\DtoManagement\Proxy\Interceptor\ReturnValue;
 
-class Generated%a extends \Solido\DtoManagement\Tests\Proxy\GeneratorStrategy\CacheWriterGeneratorStrategyTest implements \Solido\DtoManagement\Proxy\ProxyInterface
+class Generated%a extends \Solido\DtoManagement\Tests\Proxy\GeneratorStrategy\CacheWriterGeneratorStrategyTestSubject implements \Solido\DtoManagement\Proxy\ProxyInterface
 {
     %a
 
@@ -48,4 +48,8 @@ class Generated%a extends \Solido\DtoManagement\Tests\Proxy\GeneratorStrategy\Ca
 FILE
 , file_get_contents($dir . '/' . str_replace('\\', '', $className) . '.php'));
     }
+}
+
+class CacheWriterGeneratorStrategyTestSubject
+{
 }

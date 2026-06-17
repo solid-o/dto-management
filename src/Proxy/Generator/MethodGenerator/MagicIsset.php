@@ -13,6 +13,7 @@ use Solido\DtoManagement\Proxy\Generator\Util\PublicScopeSimulator;
 
 class MagicIsset extends MagicMethodGenerator
 {
+    /** @param ReflectionClass<object> $originalClass */
     public function __construct(ReflectionClass $originalClass, ValueHolderProperty $valueHolder)
     {
         parent::__construct($originalClass, '__isset', [new ParameterGenerator('name')]);

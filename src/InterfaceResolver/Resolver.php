@@ -39,7 +39,12 @@ class Resolver implements ResolverInterface
             $version = (string) $version;
         }
 
-        return $this->registry->get($interface)->get($version ?? 'latest');
+        $resolved = $this->registry->get($interface)->get($version ?? 'latest');
+        if (! $resolved instanceof $interface) {
+            throw new InvalidArgumentException(sprintf('Resolved service must be an instance of "%s", %s returned', $interface, get_debug_type($resolved)));
+        }
+
+        return $resolved;
     }
 
     public function has(string $interface): bool

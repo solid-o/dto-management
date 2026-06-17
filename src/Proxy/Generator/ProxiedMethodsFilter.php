@@ -32,7 +32,7 @@ final class ProxiedMethodsFilter
     ];
 
     /**
-     * @param ReflectionClass $class reflection class from which methods should be extracted
+     * @param ReflectionClass<object> $class reflection class from which methods should be extracted
      * @param string[] $excluded methods to be ignored
      *
      * @return ReflectionMethod[]
@@ -43,6 +43,7 @@ final class ProxiedMethodsFilter
     }
 
     /**
+     * @param ReflectionClass<object> $class
      * @param string[] $excluded
      *
      * @return ReflectionMethod[]

@@ -18,11 +18,7 @@ use function str_replace;
 use function uksort;
 use function version_compare;
 
-/**
- * @internal
- *
- * @template T of object
- */
+/** @internal */
 class ServiceLocator implements ContainerInterface
 {
     /** @var array<string, string> */
@@ -47,7 +43,7 @@ class ServiceLocator implements ContainerInterface
     /**
      * {@inheritDoc}
      *
-     * @return T
+     * @return object
      */
     public function get(mixed $id): object
     {
@@ -77,7 +73,6 @@ class ServiceLocator implements ContainerInterface
 
             if ($cacheItem !== null) {
                 $cacheItem->set($last);
-                assert($this->cache !== null);
                 $this->cache->saveDeferred($cacheItem);
             }
         }

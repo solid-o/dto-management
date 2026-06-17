@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Laminas\Code\Generator\PropertyGenerator;
 
 use function array_map;
+use function in_array;
 use function implode;
 use function sprintf;
 
@@ -36,6 +37,10 @@ class PublicScopeSimulator
         PropertyGenerator $valueHolder,
         string $returnPropertyName,
     ): string {
+        if (! in_array($operationType, [self::OPERATION_GET, self::OPERATION_ISSET], true)) {
+            throw new InvalidArgumentException(sprintf('Invalid operation "%s" provided', $operationType));
+        }
+
         $byRef  = self::getByRefReturnValue($operationType);
         $target = '$this->' . $valueHolder->getName();
 
@@ -113,8 +118,6 @@ class PublicScopeSimulator
 
     /**
      * @phpstan-param self::OPERATION_* $operationType
-     *
-     * @throws InvalidArgumentException
      */
     private static function getOperation(string $operationType, string $nameParameter): string
     {
@@ -122,12 +125,7 @@ class PublicScopeSimulator
             return 'return $targetObject->$' . $nameParameter . ';';
         }
 
-        if ($operationType === self::OPERATION_ISSET) {
-            return 'return isset($targetObject->$' . $nameParameter . ');';
-        }
-
-        /* @phpstan-ignore-next-line */
-        throw new InvalidArgumentException(sprintf('Invalid operation "%s" provided', $operationType));
+        return 'return isset($targetObject->$' . $nameParameter . ');';
     }
 
     /**

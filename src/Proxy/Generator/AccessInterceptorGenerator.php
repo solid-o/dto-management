@@ -42,6 +42,10 @@ class AccessInterceptorGenerator implements ProxyGeneratorInterface
      * @throws EmptyBuilderException
      * @throws ReflectionException
      */
+    /**
+     * @param ReflectionClass<object> $originalClass
+     * @param array<string, mixed> $options
+     */
     public function generate(ReflectionClass $originalClass, ClassGenerator $classGenerator, array $options = []): void
     {
         $builder = new ProxyBuilder($originalClass);
