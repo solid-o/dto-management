@@ -23,7 +23,11 @@ class ServiceLocator implements ContainerInterface
 {
     /** @var array<string, string> */
     private array $loading;
+    /** @var array<string, string> */
+    private array $resolvedVersions = [];
     private string $cacheItemPrefix;
+    private string $firstVersion;
+    private string $latestVersion;
 
     /** @param array<string, callable> $factories */
     public function __construct(private string $interfaceName, private array $factories, private CacheItemPoolInterface|null $cache = null)
@@ -31,45 +35,29 @@ class ServiceLocator implements ContainerInterface
         $this->loading = [];
         $this->cacheItemPrefix = str_replace('\\', '', $this->interfaceName) . '_';
         uksort($this->factories, static fn (string $a, string $b): int => version_compare($a, $b));
+        $versions = array_keys($this->factories);
+        $this->firstVersion = (string) $versions[0];
+        $this->latestVersion = (string) array_key_last($this->factories);
     }
 
     public function has(mixed $id): bool
     {
-        $key = array_keys($this->factories)[0];
-
-        return version_compare((string) $id, (string) $key, '>=');
+        return version_compare((string) $id, $this->firstVersion, '>=');
     }
 
     public function get(mixed $id): object
     {
         $last = null;
         if ($id === 'latest') {
-            $id = array_key_last($this->factories);
+            $id = $this->latestVersion;
         }
 
         $id = (string) $id;
-        $cacheItem = $this->cache?->getItem($this->cacheItemPrefix . $id);
-        if ($cacheItem !== null && $cacheItem->isHit()) {
-            $last = $cacheItem->get();
-            assert(is_string($last));
+        if (isset($this->resolvedVersions[$id])) {
+            $last = $this->resolvedVersions[$id];
         } else {
-            foreach ($this->factories as $version => $service) {
-                $version = (string) $version;
-                if (! version_compare($version, $id, '<=')) {
-                    break;
-                }
-
-                $last = $version;
-            }
-
-            if ($last === null) {
-                throw new ServiceNotFoundException($this->interfaceName, $id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
-            }
-
-            if ($cacheItem !== null) {
-                $cacheItem->set($last);
-                $this->cache->saveDeferred($cacheItem);
-            }
+            $last = $this->resolveVersion($id);
+            $this->resolvedVersions[$id] = $last;
         }
 
         $factory = $this->factories[$last];
@@ -104,5 +92,37 @@ class ServiceLocator implements ContainerInterface
     public function getVersions(): array
     {
         return array_keys($this->factories);
+    }
+
+    private function resolveVersion(string $id): string
+    {
+        $last = null;
+        $cacheItem = $this->cache?->getItem($this->cacheItemPrefix . $id);
+        if ($cacheItem !== null && $cacheItem->isHit()) {
+            $last = $cacheItem->get();
+            assert(is_string($last));
+
+            return $last;
+        }
+
+        foreach ($this->factories as $version => $service) {
+            $version = (string) $version;
+            if (! version_compare($version, $id, '<=')) {
+                break;
+            }
+
+            $last = $version;
+        }
+
+        if ($last === null) {
+            throw new ServiceNotFoundException($this->interfaceName, $id, $this->loading ? end($this->loading) : null, null, array_keys($this->factories));
+        }
+
+        if ($cacheItem !== null) {
+            $cacheItem->set($last);
+            $this->cache->saveDeferred($cacheItem);
+        }
+
+        return $last;
     }
 }

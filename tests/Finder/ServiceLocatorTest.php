@@ -2,6 +2,8 @@
 
 namespace Solido\DtoManagement\Tests\Finder;
 
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use PHPUnit\Framework\TestCase;
 use Solido\DtoManagement\Exception\RuntimeException;
 use Solido\DtoManagement\Exception\ServiceCircularReferenceException;
@@ -65,6 +67,46 @@ class ServiceLocatorTest extends TestCase
         self::assertInstanceOf(Fixtures\SemVerModel\v1\v1_1\User::class, $locator->get('1.2'));
         self::assertInstanceOf(Fixtures\SemVerModel\v1\v1_1\User::class, $locator('1.2'));
         self::assertNull($locator('0.2'));
+    }
+
+    public function testGetShouldCacheResolvedVersionInMemory(): void
+    {
+        $cacheItem = $this->createMock(CacheItemInterface::class);
+        $cacheItem->expects(self::once())
+            ->method('isHit')
+            ->willReturn(false);
+        $cacheItem->expects(self::once())
+            ->method('set')
+            ->with('1.1')
+            ->willReturnSelf();
+
+        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache->expects(self::once())
+            ->method('getItem')
+            ->with('stdClass_1.2')
+            ->willReturn($cacheItem);
+        $cache->expects(self::once())
+            ->method('saveDeferred')
+            ->with($cacheItem)
+            ->willReturn(true);
+
+        $factoryCalls = 0;
+        $locator = new ServiceLocator(\stdClass::class, [
+            '1.0' => static function () use (&$factoryCalls): \stdClass {
+                ++$factoryCalls;
+
+                return new \stdClass();
+            },
+            '1.1' => static function () use (&$factoryCalls): \stdClass {
+                ++$factoryCalls;
+
+                return new \stdClass();
+            },
+        ], $cache);
+
+        self::assertInstanceOf(\stdClass::class, $locator->get('1.2'));
+        self::assertInstanceOf(\stdClass::class, $locator->get('1.2'));
+        self::assertSame(2, $factoryCalls);
     }
 
     public function testGetShouldThrowOnCircularDependency(): void
